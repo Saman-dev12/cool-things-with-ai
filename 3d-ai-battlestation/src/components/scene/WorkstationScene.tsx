@@ -13,6 +13,7 @@ import {
   createLeatherDeskPadTexture,
   createSpeakerConeTexture,
   createCitySkylineTexture,
+  createGalleryArtTexture,
 } from './ProceduralTextures';
 import { FPVControls, type InteractTarget } from './FPVControls';
 import { soundFx, musicPlayer } from '../../audio/soundEngine';
@@ -96,9 +97,11 @@ function FlagshipPCTower({
   const fansRef = useRef<THREE.Group>(null);
   const gpuFansRef = useRef<THREE.Group>(null);
   const ramRef = useRef<THREE.Mesh>(null);
+  const elapsedRef = useRef(0);
 
-  useFrame(({ clock }, delta) => {
+  useFrame((_, delta) => {
     if (!isPoweredOn) return;
+    elapsedRef.current += delta;
     if (fansRef.current) {
       fansRef.current.children.forEach((fan) => {
         fan.rotation.z += delta * 14;
@@ -111,7 +114,7 @@ function FlagshipPCTower({
     }
     if (ramRef.current) {
       const mat = ramRef.current.material as THREE.MeshBasicMaterial;
-      const hue = (clock.getElapsedTime() * 0.12) % 1;
+      const hue = (elapsedRef.current * 0.12) % 1;
       mat.color.setHSL(hue, 0.9, 0.6);
     }
   });
@@ -944,12 +947,25 @@ export const WorkstationScene: React.FC = () => {
   const leatherPadTexture = useMemo(() => createLeatherDeskPadTexture(), []);
   const speakerTexture = useMemo(() => createSpeakerConeTexture(), []);
   const skylineTexture = useMemo(() => createCitySkylineTexture(), []);
+  const artTexture1 = useMemo(() => createGalleryArtTexture(0), []);
+  const artTexture2 = useMemo(() => createGalleryArtTexture(1), []);
 
   const [isPcPoweredOn, setIsPcPoweredOn] = useState(true);
 
-  // Realtime Mirroring Screen Texture
-  const screenTexture = useMemo(() => {
-    return createScreenTexture(currentTheme, currentWallpaper, windows, activeAppId);
+  // Realtime Mirroring Screen Texture with automatic GPU texture memory disposal
+  const [screenTexture, setScreenTexture] = useState<THREE.CanvasTexture>(() =>
+    createScreenTexture(currentTheme, currentWallpaper, windows, activeAppId)
+  );
+
+  useEffect(() => {
+    const newTex = createScreenTexture(currentTheme, currentWallpaper, windows, activeAppId);
+    setScreenTexture((prev) => {
+      prev?.dispose();
+      return newTex;
+    });
+    return () => {
+      newTex.dispose();
+    };
   }, [currentTheme, currentWallpaper, windows, activeAppId]);
 
   // Camera transitions when cameraMode changes
@@ -1073,6 +1089,17 @@ export const WorkstationScene: React.FC = () => {
             <boxGeometry args={[3.2, 0.004, 0.012]} />
             <meshStandardMaterial color="#4a3325" roughness={0.3} />
           </mesh>
+
+          {/* Desk Edge RGB Under-Glow Diffuser Strips */}
+          <mesh position={[0, -0.034, 0.72]}>
+            <boxGeometry args={[3.16, 0.005, 0.012]} />
+            <meshBasicMaterial color={neonColor} />
+          </mesh>
+          <mesh position={[0, -0.034, -0.52]}>
+            <boxGeometry args={[3.16, 0.005, 0.012]} />
+            <meshBasicMaterial color={neonColor} />
+          </mesh>
+          <pointLight position={[0, -0.06, -0.4]} color={neonColor} intensity={1.1} distance={1.8} />
 
           {/* Heavy-Duty Motorized Standing Desk Legs */}
           <mesh position={[-1.4, -0.45, 0.1]}>
@@ -1237,14 +1264,41 @@ export const WorkstationScene: React.FC = () => {
           {/* Framed Photography Prints with Picture Lights */}
           {[-1.6, 0.4].map((x, idx) => (
             <group key={idx} position={[x, 0.4, 0.02]}>
+              {/* Outer Deep Black Matte Frame */}
               <mesh castShadow>
                 <boxGeometry args={[1.1, 1.4, 0.03]} />
-                <meshStandardMaterial color="#020617" roughness={0.3} />
+                <meshStandardMaterial color="#020617" roughness={0.3} metalness={0.7} />
               </mesh>
-              <mesh position={[0, 0, 0.02]}>
-                <planeGeometry args={[0.96, 1.26]} />
-                <meshStandardMaterial color={idx === 0 ? '#38bdf8' : '#ec4899'} roughness={0.5} />
+              {/* Archival Off-White Passe-Partout Mat Board */}
+              <mesh position={[0, 0, 0.016]}>
+                <planeGeometry args={[1.02, 1.32]} />
+                <meshStandardMaterial color="#f8fafc" roughness={0.9} />
               </mesh>
+              {/* High-Resolution Gallery Canvas Artwork */}
+              <mesh position={[0, 0, 0.019]}>
+                <planeGeometry args={[0.82, 1.12]} />
+                <meshStandardMaterial map={idx === 0 ? artTexture1 : artTexture2} roughness={0.35} />
+              </mesh>
+              {/* Museum Chrome/Brass Picture Light Luminaire */}
+              <group position={[0, 0.74, 0.08]}>
+                <mesh rotation={[0, 0, Math.PI / 2]}>
+                  <cylinderGeometry args={[0.007, 0.007, 0.45, 16]} />
+                  <meshStandardMaterial color="#cbd5e1" metalness={0.95} roughness={0.1} />
+                </mesh>
+                <mesh position={[0, -0.008, 0.002]}>
+                  <boxGeometry args={[0.42, 0.004, 0.008]} />
+                  <meshBasicMaterial color="#fffbeb" />
+                </mesh>
+                <spotLight
+                  position={[0, -0.04, 0.06]}
+                  target-position={[0, -0.45, 0]}
+                  color="#fffbeb"
+                  intensity={2.2}
+                  angle={0.65}
+                  penumbra={0.6}
+                  distance={2.0}
+                />
+              </group>
             </group>
           ))}
         </group>

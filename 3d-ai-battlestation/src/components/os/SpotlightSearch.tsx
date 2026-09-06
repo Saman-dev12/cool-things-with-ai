@@ -209,6 +209,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ isOpen, onClos
         handleSelect(results[selectedIndex]);
       }
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       onClose();
     }
   };

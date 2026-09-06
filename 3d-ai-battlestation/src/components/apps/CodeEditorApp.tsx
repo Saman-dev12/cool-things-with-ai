@@ -131,6 +131,7 @@ export const CodeEditorApp: React.FC = () => {
 
   const activeFile = files.find((f) => f.id === activeFileId) || files[0];
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const updateCode = (newCode: string) => {
     soundFx.keyPress();
@@ -245,22 +246,27 @@ export const CodeEditorApp: React.FC = () => {
     }
   };
 
-  // Keyboard shortcut: Ctrl+Enter or Cmd+Enter to run
+  // Keyboard shortcut: Ctrl+Enter or Cmd+Enter to run when focused in CodeCraft
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        runCode();
+        if (containerRef.current?.contains(document.activeElement)) {
+          e.preventDefault();
+          runCode();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }, [activeFile.code, isRunning]);
 
   const lines = (activeFile.code || '').split('\n');
 
   return (
-    <div className="w-full h-full bg-[#0a0e17] flex flex-col overflow-hidden text-gray-200 select-none font-mono text-xs">
+    <div
+      ref={containerRef}
+      className="w-full h-full bg-[#0a0e17] flex flex-col overflow-hidden text-gray-200 select-none font-mono text-xs"
+    >
       {/* Editor Header / Multi-File Tabs */}
       <div className="bg-slate-900/90 border-b border-white/10 flex items-center justify-between px-2 py-1 gap-2">
         <div className="flex items-center gap-1 overflow-x-auto">

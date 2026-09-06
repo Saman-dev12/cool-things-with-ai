@@ -11,10 +11,11 @@ const MainLayout: React.FC = () => {
   // Instant Stand Up / Mode Switching via Keyboard
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Don't capture keys if typing in an input
+      // Don't capture keys if typing in an input, textarea, or editable element
       if (
         document.activeElement?.tagName === 'INPUT' ||
-        document.activeElement?.tagName === 'TEXTAREA'
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
       ) {
         return;
       }
@@ -41,7 +42,7 @@ const MainLayout: React.FC = () => {
           setCameraMode('fpv');
         }
       } else if (cameraMode === 'screen') {
-        if (e.code === 'Escape') {
+        if (e.code === 'Escape' && !e.defaultPrevented) {
           soundFx.click();
           setCameraMode('desk');
         }

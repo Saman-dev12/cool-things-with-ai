@@ -78,8 +78,12 @@ export const Desktop: React.FC = () => {
 
       // 4. Escape: Close Spotlight & Help modals
       if (e.key === 'Escape') {
-        setShowSpotlight(false);
-        setShowHelp(false);
+        if (showSpotlight || showHelp) {
+          e.preventDefault();
+          setShowSpotlight(false);
+          setShowHelp(false);
+          return;
+        }
       }
     };
 

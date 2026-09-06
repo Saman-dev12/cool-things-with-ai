@@ -439,3 +439,95 @@ export function createCitySkylineTexture(): THREE.CanvasTexture {
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
 }
+
+// 8. Architectural Gallery Abstract Artwork Textures (Tokyo Rain & Deep Space Nebula)
+export function createGalleryArtTexture(index: number): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 700;
+  const ctx = canvas.getContext('2d')!;
+
+  if (index === 0) {
+    // Artwork 1: "Neon Tokyo Rain Reflections" - Moody cyberpunk metropolis watercolor / acrylic
+    const grad = ctx.createLinearGradient(0, 0, 0, 700);
+    grad.addColorStop(0, '#0a0d18');
+    grad.addColorStop(0.35, '#1e1b4b');
+    grad.addColorStop(0.65, '#3b0764');
+    grad.addColorStop(0.85, '#831843');
+    grad.addColorStop(1, '#090514');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 700);
+
+    // Glowing vertical neon light bars
+    const neonStrips = [
+      { x: 80, w: 14, color: '#f43f5e' },
+      { x: 140, w: 20, color: '#06b6d4' },
+      { x: 220, w: 12, color: '#ec4899' },
+      { x: 290, w: 24, color: '#38bdf8' },
+      { x: 380, w: 18, color: '#a855f7' },
+      { x: 440, w: 15, color: '#f59e0b' },
+    ];
+    neonStrips.forEach((s) => {
+      const g = ctx.createLinearGradient(0, 100, 0, 650);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(0.2, s.color);
+      g.addColorStop(0.65, s.color);
+      g.addColorStop(0.8, `${s.color}88`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(s.x - 10, 80, s.w + 20, 560);
+    });
+
+    // Rain drop streaks and wet pavement reflections
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    for (let i = 0; i < 120; i++) {
+      const rx = Math.random() * 512;
+      const ry = Math.random() * 500;
+      ctx.fillRect(rx, ry, 1, 8 + Math.random() * 14);
+    }
+
+    // Wet asphalt ground reflection ripple lines
+    for (let r = 520; r < 700; r += 7) {
+      ctx.fillStyle = `rgba(244, 63, 94, ${0.15 + Math.random() * 0.2})`;
+      ctx.fillRect(40 + Math.random() * 80, r, 200 + Math.random() * 120, 2);
+      ctx.fillStyle = `rgba(6, 182, 212, ${0.15 + Math.random() * 0.2})`;
+      ctx.fillRect(220 + Math.random() * 80, r + 3, 180 + Math.random() * 80, 2);
+    }
+  } else {
+    // Artwork 2: "Cosmic Event Horizon" - Deep space stellar vortex
+    const grad = ctx.createRadialGradient(256, 350, 20, 256, 350, 380);
+    grad.addColorStop(0, '#fef08a');
+    grad.addColorStop(0.12, '#f97316');
+    grad.addColorStop(0.3, '#c026d3');
+    grad.addColorStop(0.55, '#312e81');
+    grad.addColorStop(0.8, '#0f172a');
+    grad.addColorStop(1, '#020617');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 700);
+
+    // Accretion disk spiral arms
+    for (let ring = 0; ring < 24; ring++) {
+      ctx.strokeStyle = `rgba(${180 + ring * 3}, ${120 + ring * 4}, 255, ${0.25 - ring * 0.008})`;
+      ctx.lineWidth = 3 + ring * 0.8;
+      ctx.beginPath();
+      ctx.ellipse(256, 350, 120 + ring * 10, 45 + ring * 4, -0.4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Distant stars & galaxies
+    for (let s = 0; s < 180; s++) {
+      const sx = Math.random() * 512;
+      const sy = Math.random() * 700;
+      const size = Math.random() > 0.9 ? 2.5 : 1;
+      ctx.fillStyle = Math.random() > 0.4 ? '#ffffff' : '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(sx, sy, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+

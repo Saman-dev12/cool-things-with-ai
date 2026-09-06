@@ -176,6 +176,13 @@ const SpaceShooterGame: React.FC<{ crtFilter: boolean }> = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
         stateRef.current.movingLeft = true;
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
@@ -443,6 +450,13 @@ const CyberSnakeGame: React.FC<{ crtFilter: boolean }> = () => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
       const { dir } = gameState.current;
       if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && dir.y === 0) {
         e.preventDefault();
@@ -665,6 +679,13 @@ const NeonBreakerGame: React.FC<{ crtFilter: boolean }> = () => {
 
   useEffect(() => {
     const handleDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') stateRef.current.movingLeft = true;
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') stateRef.current.movingRight = true;
     };

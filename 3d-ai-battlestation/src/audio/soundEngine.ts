@@ -534,10 +534,11 @@ class ProceduralMusicPlayer {
   private startProceduralFallback() {
     if (this.beatIntervalId) clearInterval(this.beatIntervalId);
     const track = this.getTrack();
-    const beatInterval = (60 / track.bpm) * 1000 * 0.5;
+    const stepSeconds = (60 / track.bpm) * 0.5;
+    const beatInterval = stepSeconds * 1000;
     this.beatIntervalId = window.setInterval(() => {
       this.playStep();
-      this.elapsedSeconds += 0.25;
+      this.elapsedSeconds += stepSeconds;
       if (this.elapsedSeconds >= track.duration) {
         this.nextTrack();
       } else {
