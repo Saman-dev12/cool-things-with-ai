@@ -1,8 +1,8 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { CameraControls, ContactShadows, Float } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { CameraControls, ContactShadows, Float, Environment, RoundedBox } from '@react-three/drei';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { useOS } from '../../context/OSContext';
 import { createScreenTexture } from './ScreenCanvasTexture';
 import {
@@ -17,28 +17,6 @@ import {
 } from './ProceduralTextures';
 import { FPVControls, type InteractTarget } from './FPVControls';
 import { soundFx, musicPlayer } from '../../audio/soundEngine';
-
-// ==================== PHOTOREALISTIC STUDIO ENVIRONMENT MAP ====================
-function RealisticEnvironment() {
-  const { gl, scene } = useThree();
-
-  useEffect(() => {
-    const pmremGenerator = new THREE.PMREMGenerator(gl);
-    pmremGenerator.compileEquirectangularShader();
-    const roomEnv = new RoomEnvironment();
-    const envTexture = pmremGenerator.fromScene(roomEnv, 0.04).texture;
-    scene.environment = envTexture;
-
-    return () => {
-      scene.environment = null;
-      envTexture.dispose();
-      roomEnv.dispose();
-      pmremGenerator.dispose();
-    };
-  }, [gl, scene]);
-
-  return null;
-}
 
 // ==================== PROCEDURAL STEAM PARTICLES ====================
 function CoffeeSteam() {
@@ -127,16 +105,14 @@ function FlagshipPCTower({
     >
       {/* 1. Anodized Aluminum Mid-Tower Frame (Lian Li O11 Vision Style Proportions: 0.26w x 0.52h x 0.48d) */}
       {/* Lower PSU Shroud Pedestal with Hexagonal Vent Pattern */}
-      <mesh position={[0, -0.21, 0]} castShadow>
-        <boxGeometry args={[0.26, 0.14, 0.48]} />
+      <RoundedBox position={[0, -0.21, 0]} args={[0.26, 0.14, 0.48]} radius={0.008} smoothness={4} castShadow>
         <meshStandardMaterial color="#0b0f19" metalness={0.92} roughness={0.2} />
-      </mesh>
+      </RoundedBox>
 
       {/* Top 360 Radiator Exhaust Bracket & Fine Magnetic Mesh Filter */}
-      <mesh position={[0, 0.25, 0]}>
-        <boxGeometry args={[0.26, 0.035, 0.48]} />
+      <RoundedBox position={[0, 0.25, 0]} args={[0.26, 0.035, 0.48]} radius={0.006} smoothness={4}>
         <meshStandardMaterial color="#0b0f19" metalness={0.92} roughness={0.2} />
-      </mesh>
+      </RoundedBox>
 
       {/* Rear Motherboard Tray & CNC IO Shield */}
       <mesh position={[0.12, 0.02, 0]}>
@@ -403,10 +379,9 @@ function DisplayMonitor({
       {/* Display Enclosure with 1800R Curvature */}
       <group position={[0, 0.52, -0.22]} rotation={[-0.03, 0, 0]}>
         {/* Rear Curved Bezel Shell with Matte Aerospace Aluminum Finish */}
-        <mesh position={[0, 0, -0.02]} castShadow>
-          <boxGeometry args={[1.96, 0.88, 0.035]} />
+        <RoundedBox position={[0, 0, -0.02]} args={[1.96, 0.88, 0.035]} radius={0.016} smoothness={4} castShadow>
           <meshStandardMaterial color="#0b0f19" metalness={0.88} roughness={0.2} />
-        </mesh>
+        </RoundedBox>
 
         {/* 1.8mm Ultra-Thin Outer Bezel Trim */}
         <mesh position={[0, 0, -0.002]}>
@@ -487,10 +462,9 @@ function AudioMonitors({ speakerTexture }: { speakerTexture: THREE.CanvasTexture
         </mesh>
 
         {/* Curved MDF Satin Black Acoustic Enclosure */}
-        <mesh castShadow>
-          <boxGeometry args={[0.21, 0.35, 0.23]} />
+        <RoundedBox args={[0.21, 0.35, 0.23]} radius={0.012} smoothness={4} castShadow>
           <meshStandardMaterial color="#18181b" roughness={0.35} metalness={0.15} />
-        </mesh>
+        </RoundedBox>
 
         {/* Front Baffle Chamfer Trim */}
         <mesh position={[0, 0, 0.116]}>
@@ -532,10 +506,9 @@ function AudioMonitors({ speakerTexture }: { speakerTexture: THREE.CanvasTexture
         </mesh>
 
         {/* Curved MDF Satin Black Acoustic Enclosure */}
-        <mesh castShadow>
-          <boxGeometry args={[0.21, 0.35, 0.23]} />
+        <RoundedBox args={[0.21, 0.35, 0.23]} radius={0.012} smoothness={4} castShadow>
           <meshStandardMaterial color="#18181b" roughness={0.35} metalness={0.15} />
-        </mesh>
+        </RoundedBox>
 
         {/* Front Baffle Chamfer Trim */}
         <mesh position={[0, 0, 0.116]}>
@@ -571,10 +544,9 @@ function AudioMonitors({ speakerTexture }: { speakerTexture: THREE.CanvasTexture
       {/* Focusrite Scarlett 2i2 USB-C Audio Interface */}
       <group position={[-0.85, 0.04, 0.12]}>
         {/* Brushed Red Anodized Aluminum Enclosure */}
-        <mesh castShadow>
-          <boxGeometry args={[0.22, 0.052, 0.14]} />
+        <RoundedBox args={[0.22, 0.052, 0.14]} radius={0.008} smoothness={4} castShadow>
           <meshStandardMaterial color="#b91c1c" metalness={0.85} roughness={0.25} />
-        </mesh>
+        </RoundedBox>
         {/* Glossy Black Front Faceplate */}
         <mesh position={[0, 0, 0.072]}>
           <boxGeometry args={[0.21, 0.044, 0.004]} />
@@ -617,22 +589,20 @@ function KeyboardAndMouse({
   return (
     <group position={[0, 0.02, 0.44]}>
       {/* 900x400mm Stitched Micro-Weave Leather Desk Pad */}
-      <mesh position={[0, -0.01, -0.02]} receiveShadow>
-        <boxGeometry args={[1.58, 0.008, 0.68]} />
+      <RoundedBox position={[0, -0.01, -0.02]} args={[1.58, 0.008, 0.68]} radius={0.018} smoothness={4} receiveShadow>
         <meshStandardMaterial
           map={leatherPadTexture}
           roughness={0.7}
           metalness={0.1}
         />
-      </mesh>
+      </RoundedBox>
 
       {/* Custom 75% Mechanical Keyboard (CNC Aluminum Case + Brass Weight) */}
       <group position={[-0.14, 0.014, 0]} rotation={[0.05, 0, 0]}>
-        {/* Anodized Dark Titan Aluminum Case */}
-        <mesh castShadow>
-          <boxGeometry args={[0.66, 0.03, 0.24]} />
+        {/* Anodized Dark Titan Aluminum Case with Beveled Chamfers */}
+        <RoundedBox args={[0.66, 0.03, 0.24]} radius={0.01} smoothness={4} castShadow>
           <meshStandardMaterial color="#0f172a" metalness={0.92} roughness={0.18} />
-        </mesh>
+        </RoundedBox>
         {/* Brass Internal Weight Plate Underglow */}
         <mesh position={[0, -0.01, 0]}>
           <boxGeometry args={[0.65, 0.006, 0.23]} />
@@ -669,10 +639,9 @@ function KeyboardAndMouse({
       {/* Ergonomic Wireless Mouse (Logitech MX Master 3S Style with MagSpeed Wheel) */}
       <group position={[0.45, 0.022, 0.02]}>
         {/* Sculpted Matte Body with Thumb Rest */}
-        <mesh castShadow>
-          <boxGeometry args={[0.11, 0.042, 0.18]} />
+        <RoundedBox args={[0.11, 0.042, 0.18]} radius={0.022} smoothness={4} castShadow>
           <meshStandardMaterial color="#111827" metalness={0.65} roughness={0.25} />
-        </mesh>
+        </RoundedBox>
         {/* Knurled Metal MagSpeed Scroll Wheel */}
         <mesh position={[0, 0.024, -0.038]}>
           <cylinderGeometry args={[0.008, 0.008, 0.012, 20]} />
@@ -740,26 +709,107 @@ function KeyboardAndMouse({
   );
 }
 
-// ==================== ERGONOMIC MESH OFFICE CHAIR ====================
+// ==================== PHOTOREALISTIC ERGONOMIC CHAIR (HERMAN MILLER AERON STYLE) ====================
 function ErgonomicChair() {
   return (
     <group position={[0, -0.15, 1.25]} rotation={[0, Math.PI, 0]}>
-      <mesh position={[0, -0.68, 0]}>
-        <cylinderGeometry args={[0.35, 0.35, 0.04, 5]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.9} roughness={0.2} />
-      </mesh>
+      {/* 5-Star Die-Cast Aluminum Base with Roller Wheels */}
+      <group position={[0, -0.68, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.045, 0.055, 0.06, 16]} />
+          <meshStandardMaterial color="#334155" metalness={0.92} roughness={0.15} />
+        </mesh>
+        {/* 5 Star Legs */}
+        {Array.from({ length: 5 }).map((_, i) => {
+          const angle = (i * Math.PI * 2) / 5;
+          const lx = Math.sin(angle) * 0.28;
+          const lz = Math.cos(angle) * 0.28;
+          return (
+            <group key={i}>
+              <mesh position={[lx * 0.5, -0.015, lz * 0.5]} rotation={[0, -angle, 0.08]}>
+                <boxGeometry args={[0.035, 0.02, 0.32]} />
+                <meshStandardMaterial color="#1e293b" metalness={0.92} roughness={0.15} />
+              </mesh>
+              {/* Dual Caster Wheel at tip */}
+              <group position={[lx, -0.04, lz]}>
+                <mesh rotation={[0, 0, Math.PI / 2]}>
+                  <cylinderGeometry args={[0.025, 0.025, 0.022, 16]} />
+                  <meshStandardMaterial color="#09090b" roughness={0.6} />
+                </mesh>
+                <mesh position={[0, 0.02, 0]}>
+                  <cylinderGeometry args={[0.005, 0.005, 0.02, 8]} />
+                  <meshStandardMaterial color="#cbd5e1" metalness={0.95} roughness={0.1} />
+                </mesh>
+              </group>
+            </group>
+          );
+        })}
+      </group>
+
+      {/* Heavy Chrome Gas-Lift Pneumatic Piston with Lever */}
       <mesh position={[0, -0.45, 0]}>
-        <cylinderGeometry args={[0.03, 0.03, 0.45, 16]} />
-        <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.1} />
+        <cylinderGeometry args={[0.025, 0.025, 0.42, 20]} />
+        <meshStandardMaterial color="#cbd5e1" metalness={0.95} roughness={0.08} />
       </mesh>
-      <mesh position={[0, -0.22, 0]}>
-        <boxGeometry args={[0.54, 0.06, 0.52]} />
-        <meshStandardMaterial color="#0f172a" roughness={0.7} />
+      {/* Tilt Mechanism Under-Seat Box & Tension Knob */}
+      <mesh position={[0, -0.25, 0.02]}>
+        <boxGeometry args={[0.18, 0.06, 0.22]} />
+        <meshStandardMaterial color="#0f172a" metalness={0.8} roughness={0.3} />
       </mesh>
-      <mesh position={[0, 0.2, 0.24]} rotation={[-0.1, 0, 0]}>
-        <boxGeometry args={[0.48, 0.65, 0.04]} />
-        <meshStandardMaterial color="#1e293b" roughness={0.6} metalness={0.4} />
+      <mesh position={[0.10, -0.25, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.008, 0.008, 0.12, 12]} />
+        <meshStandardMaterial color="#475569" metalness={0.9} roughness={0.2} />
       </mesh>
+
+      {/* Contoured Ergonomic Seat Pan with Rounded Waterfall Edge */}
+      <group position={[0, -0.19, 0]}>
+        <RoundedBox args={[0.54, 0.05, 0.52]} radius={0.024} smoothness={4} castShadow receiveShadow>
+          <meshStandardMaterial color="#090d16" roughness={0.8} />
+        </RoundedBox>
+        {/* Breathable Pellicle Mesh Weave Inset */}
+        <mesh position={[0, 0.026, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.48, 0.46]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.95} />
+        </mesh>
+      </group>
+
+      {/* Die-Cast Aluminum Spine & Lumbar PostureFit Support */}
+      <group position={[0, 0.16, 0.24]}>
+        {/* Central Vertical Spine Column */}
+        <mesh position={[0, 0, -0.02]}>
+          <boxGeometry args={[0.06, 0.54, 0.035]} />
+          <meshStandardMaterial color="#334155" metalness={0.92} roughness={0.15} />
+        </mesh>
+        {/* PostureFit Dual Lumbar Support Pad */}
+        <mesh position={[0, -0.06, -0.045]}>
+          <boxGeometry args={[0.28, 0.10, 0.02]} />
+          <meshStandardMaterial color="#090d16" roughness={0.6} />
+        </mesh>
+        {/* Breathable Mesh High-Back Frame */}
+        <RoundedBox position={[0, 0.08, 0]} args={[0.48, 0.56, 0.03]} radius={0.02} smoothness={4} castShadow>
+          <meshStandardMaterial color="#090d16" roughness={0.7} />
+        </RoundedBox>
+        {/* Translucent Mesh Back Inset */}
+        <mesh position={[0, 0.08, -0.002]}>
+          <planeGeometry args={[0.42, 0.50]} />
+          <meshStandardMaterial color="#1e293b" roughness={0.95} />
+        </mesh>
+      </group>
+
+      {/* 3D Adjustable Armrests */}
+      {[-0.27, 0.27].map((x, idx) => (
+        <group key={idx} position={[x, -0.04, 0.05]}>
+          {/* Aluminum Arm Upright */}
+          <mesh position={[0, 0.08, 0]}>
+            <cylinderGeometry args={[0.014, 0.016, 0.22, 16]} />
+            <meshStandardMaterial color="#334155" metalness={0.9} roughness={0.2} />
+          </mesh>
+          {/* Polyurethane Soft Arm Pad */}
+          <RoundedBox position={[0, 0.20, -0.02]} args={[0.08, 0.025, 0.22]} radius={0.012} smoothness={4} castShadow>
+            <meshStandardMaterial color="#09090b" roughness={0.5} />
+          </RoundedBox>
+        </group>
+      ))}
     </group>
   );
 }
@@ -776,48 +826,59 @@ function LoungeArea({
 }) {
   return (
     <>
-      {/* Modern 2-Seater Fabric Sofa */}
+      {/* Modern 2-Seater Textured Fabric Designer Sofa */}
       <group position={[0, -0.48, 3.4]} rotation={[0, 0, 0]}>
         {/* Base Seat Cushion */}
-        <mesh position={[0, 0.18, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.8, 0.28, 0.85]} />
-          <meshStandardMaterial color="#334155" roughness={0.85} />
-        </mesh>
-        {/* Backrest Cushion */}
-        <mesh position={[0, 0.50, 0.36]} castShadow>
-          <boxGeometry args={[1.8, 0.44, 0.22]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.85} />
-        </mesh>
-        {/* Armrests */}
-        <mesh position={[-0.95, 0.32, 0]}>
-          <boxGeometry args={[0.16, 0.38, 0.85]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.85} />
-        </mesh>
-        <mesh position={[0.95, 0.32, 0]}>
-          <boxGeometry args={[0.16, 0.38, 0.85]} />
-          <meshStandardMaterial color="#1e293b" roughness={0.85} />
-        </mesh>
-        {/* Wooden Tapered Legs */}
+        <RoundedBox position={[0, 0.18, 0]} args={[1.85, 0.28, 0.88]} radius={0.05} smoothness={4} castShadow receiveShadow>
+          <meshStandardMaterial color="#1e293b" roughness={0.88} />
+        </RoundedBox>
+        {/* Dual Backrest Cushions */}
+        <RoundedBox position={[-0.46, 0.50, 0.35]} args={[0.88, 0.44, 0.22]} radius={0.04} smoothness={4} castShadow>
+          <meshStandardMaterial color="#1e293b" roughness={0.88} />
+        </RoundedBox>
+        <RoundedBox position={[0.46, 0.50, 0.35]} args={[0.88, 0.44, 0.22]} radius={0.04} smoothness={4} castShadow>
+          <meshStandardMaterial color="#1e293b" roughness={0.88} />
+        </RoundedBox>
+        {/* Plush Curved Armrests */}
+        <RoundedBox position={[-0.98, 0.32, 0]} args={[0.18, 0.38, 0.88]} radius={0.04} smoothness={4}>
+          <meshStandardMaterial color="#1e293b" roughness={0.88} />
+        </RoundedBox>
+        <RoundedBox position={[0.98, 0.32, 0]} args={[0.18, 0.38, 0.88]} radius={0.04} smoothness={4}>
+          <meshStandardMaterial color="#1e293b" roughness={0.88} />
+        </RoundedBox>
+        {/* Designer Throw Pillows */}
+        <RoundedBox position={[-0.72, 0.34, 0.26]} rotation={[0.1, 0.2, 0]} args={[0.32, 0.32, 0.12]} radius={0.03} smoothness={4}>
+          <meshStandardMaterial color="#d97706" roughness={0.9} />
+        </RoundedBox>
+        <RoundedBox position={[0.72, 0.34, 0.26]} rotation={[0.1, -0.2, 0]} args={[0.32, 0.32, 0.12]} radius={0.03} smoothness={4}>
+          <meshStandardMaterial color="#0d9488" roughness={0.9} />
+        </RoundedBox>
+        {/* Turned Oak Tapered Legs with Brass Ferrules */}
         {[
           [-0.85, -0.08, 0.35],
           [0.85, -0.08, 0.35],
           [-0.85, -0.08, -0.35],
           [0.85, -0.08, -0.35],
         ].map((pos, i) => (
-          <mesh key={i} position={pos as [number, number, number]}>
-            <cylinderGeometry args={[0.02, 0.014, 0.18, 12]} />
-            <meshStandardMaterial color="#854d0e" roughness={0.4} />
-          </mesh>
+          <group key={i} position={pos as [number, number, number]}>
+            <mesh>
+              <cylinderGeometry args={[0.02, 0.014, 0.18, 16]} />
+              <meshStandardMaterial color="#78350f" roughness={0.4} />
+            </mesh>
+            <mesh position={[0, -0.07, 0]}>
+              <cylinderGeometry args={[0.015, 0.014, 0.04, 16]} />
+              <meshStandardMaterial color="#eab308" metalness={0.95} roughness={0.15} />
+            </mesh>
+          </group>
         ))}
       </group>
 
-      {/* Walnut Coffee Table with Magazines */}
+      {/* Solid Walnut & Matte Steel Coffee Table */}
       <group position={[0, -0.68, 2.3]}>
-        <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.2, 0.04, 0.6]} />
-          <meshStandardMaterial color="#78350f" roughness={0.4} />
-        </mesh>
-        {/* Table Legs */}
+        <RoundedBox position={[0, 0.12, 0]} args={[1.2, 0.045, 0.6]} radius={0.018} smoothness={4} castShadow receiveShadow>
+          <meshStandardMaterial color="#451a03" roughness={0.38} />
+        </RoundedBox>
+        {/* Modern Hairpin Steel Table Legs */}
         {[
           [-0.52, 0, 0.24],
           [0.52, 0, 0.24],
@@ -825,19 +886,54 @@ function LoungeArea({
           [0.52, 0, -0.24],
         ].map((pos, i) => (
           <mesh key={i} position={pos as [number, number, number]}>
-            <cylinderGeometry args={[0.015, 0.015, 0.24, 12]} />
-            <meshStandardMaterial color="#0f172a" metalness={0.9} roughness={0.2} />
+            <cylinderGeometry args={[0.012, 0.012, 0.24, 12]} />
+            <meshStandardMaterial color="#0f172a" metalness={0.92} roughness={0.2} />
           </mesh>
         ))}
-        {/* Magazines on Table */}
-        <mesh position={[-0.2, 0.15, 0]} rotation={[0, 0.15, 0]}>
-          <boxGeometry args={[0.26, 0.015, 0.34]} />
-          <meshStandardMaterial color="#0284c7" roughness={0.5} />
+        {/* Hardcover Architectural Monographs & Brass Incense Bowl */}
+        <mesh position={[-0.2, 0.155, 0]} rotation={[0, 0.15, 0]}>
+          <boxGeometry args={[0.26, 0.02, 0.34]} />
+          <meshStandardMaterial color="#1e1b4b" roughness={0.4} />
         </mesh>
-        <mesh position={[0.22, 0.16, 0.04]} rotation={[0, -0.2, 0]}>
-          <boxGeometry args={[0.16, 0.10, 0.16]} />
-          <meshStandardMaterial color="#f8fafc" roughness={0.3} />
+        <mesh position={[0.24, 0.158, 0.04]}>
+          <cylinderGeometry args={[0.065, 0.045, 0.035, 24]} />
+          <meshStandardMaterial color="#eab308" metalness={0.9} roughness={0.2} />
         </mesh>
+      </group>
+
+      {/* Lush Indoor Monstera Deliciosa Planter in Room Corner */}
+      <group position={[-3.8, -0.88, 3.2]}>
+        {/* Ribbed Ceramic Planter Pot */}
+        <mesh castShadow>
+          <cylinderGeometry args={[0.28, 0.22, 0.55, 32]} />
+          <meshStandardMaterial color="#f8fafc" roughness={0.35} />
+        </mesh>
+        {/* Rich Soil */}
+        <mesh position={[0, 0.27, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.27, 24]} />
+          <meshStandardMaterial color="#292524" roughness={0.95} />
+        </mesh>
+        {/* Lush Organic Fan Leaves */}
+        {Array.from({ length: 9 }).map((_, lIdx) => {
+          const lAngle = (lIdx * Math.PI * 2) / 9;
+          const lx = Math.cos(lAngle) * 0.18;
+          const lz = Math.sin(lAngle) * 0.18;
+          const rotZ = 0.35 + (lIdx % 3) * 0.12;
+          return (
+            <group key={lIdx} position={[lx, 0.28, lz]} rotation={[0, lAngle, rotZ]}>
+              {/* Stem */}
+              <mesh position={[0, 0.22, 0]}>
+                <cylinderGeometry args={[0.008, 0.01, 0.45, 8]} />
+                <meshStandardMaterial color="#15803d" roughness={0.5} />
+              </mesh>
+              {/* Broad Leaf */}
+              <mesh position={[0, 0.44, 0]} rotation={[0.4, 0, 0]}>
+                <planeGeometry args={[0.26, 0.36]} />
+                <meshStandardMaterial color="#166534" roughness={0.3} side={THREE.DoubleSide} />
+              </mesh>
+            </group>
+          );
+        })}
       </group>
 
       {/* Interactive Nordic Floor Lamp */}
@@ -1010,16 +1106,16 @@ export const WorkstationScene: React.FC = () => {
       >
         <color attach="background" args={['#080c16']} />
 
-        {/* Photorealistic IBL Studio Lighting & Environment */}
-        <RealisticEnvironment />
+        {/* Photorealistic IBL Studio Lighting & City Reflection Map */}
+        <Environment preset="city" environmentIntensity={0.68} />
 
-        {/* Ambient Room Daylight Fill */}
-        <ambientLight intensity={0.75} color="#f8fafc" />
+        {/* Ambient Room Daylight Fill (low intensity for cinematic contrast and deep shadows) */}
+        <ambientLight intensity={0.24} color="#f8fafc" />
 
         {/* Sunlight streaming through Left Loft Window */}
         <directionalLight
           position={[-5.5, 5.0, 1.5]}
-          intensity={2.4}
+          intensity={2.8}
           color="#fffbeb"
           castShadow
           shadow-mapSize-width={2048}
@@ -1073,16 +1169,22 @@ export const WorkstationScene: React.FC = () => {
 
         {/* ================= 3D WORKSTATION DESK SETUP ================= */}
         <group position={[0, 0, 0]}>
-          {/* Solid American Walnut Desktop Slab */}
-          <mesh position={[0, 0, 0.1]} castShadow receiveShadow>
-            <boxGeometry args={[3.2, 0.065, 1.3]} />
+          {/* Solid American Walnut Desktop Slab with Micro-Beveled Chamfers */}
+          <RoundedBox
+            position={[0, 0, 0.1]}
+            args={[3.2, 0.065, 1.3]}
+            radius={0.014}
+            smoothness={4}
+            castShadow
+            receiveShadow
+          >
             <meshStandardMaterial
               map={deskTextures.map}
               roughnessMap={deskTextures.roughnessMap}
               roughness={0.42}
               metalness={0.05}
             />
-          </mesh>
+          </RoundedBox>
 
           {/* Front Bevel Chamfer Strip on Desk Edge */}
           <mesh position={[0, 0.032, 0.75]}>
@@ -1182,11 +1284,10 @@ export const WorkstationScene: React.FC = () => {
 
           {/* Floating Solid American Walnut Display Shelf above Monitor */}
           <group position={[0, 0.42, 0.10]}>
-            {/* Walnut Shelf Board */}
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[2.6, 0.04, 0.22]} />
+            {/* Walnut Shelf Board with Beveled Edges */}
+            <RoundedBox args={[2.6, 0.04, 0.22]} radius={0.008} smoothness={4} castShadow receiveShadow>
               <meshStandardMaterial map={deskTextures.map} roughness={0.4} />
-            </mesh>
+            </RoundedBox>
             {/* Concealed LED Strip Under-Glow */}
             <mesh position={[0, -0.022, 0.05]}>
               <boxGeometry args={[2.5, 0.005, 0.015]} />
@@ -1344,6 +1445,17 @@ export const WorkstationScene: React.FC = () => {
           <planeGeometry args={[10, 8]} />
           <meshStandardMaterial color="#0f172a" roughness={0.9} />
         </mesh>
+
+        {/* Cinematic Camera Post-Processing Pipeline */}
+        <EffectComposer multisampling={4}>
+          <Bloom
+            luminanceThreshold={0.78}
+            luminanceSmoothing={0.35}
+            intensity={0.42}
+            mipmapBlur
+          />
+          <Vignette eskil={false} offset={0.12} darkness={0.62} />
+        </EffectComposer>
       </Canvas>
 
       {/* ================= FPV FIRST-PERSON ON-SCREEN OVERLAY & INTERACTION BANNER ================= */}
