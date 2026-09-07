@@ -8,15 +8,9 @@ import {
   CheckCircle2, 
   Circle, 
   Flame, 
-  TrendingUp, 
   Layers, 
-  Terminal, 
-  Filter, 
-  ChevronRight,
-  BookOpen,
   ArrowRight,
-  ShieldAlert,
-  Sparkles,
+  ChevronRight,
   ChevronLeft
 } from 'lucide-react';
 
@@ -43,15 +37,11 @@ export const ProblemSetView: React.FC = () => {
   // Filter problems
   const filteredProblems = useMemo(() => {
     return allProblems.filter(p => {
-      // Track filter
       if (activeTrackFilter !== 'all' && p.track !== activeTrackFilter) return false;
-      // Difficulty filter
       if (difficultyFilter !== 'all' && p.difficulty !== difficultyFilter) return false;
-      // Status filter
       const isSolved = solvedChallengeIds.includes(p.id);
       if (statusFilter === 'solved' && !isSolved) return false;
       if (statusFilter === 'todo' && isSolved) return false;
-      // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = p.title.toLowerCase().includes(query);
@@ -64,164 +54,151 @@ export const ProblemSetView: React.FC = () => {
     });
   }, [allProblems, activeTrackFilter, difficultyFilter, statusFilter, searchQuery, solvedChallengeIds]);
 
-  // Pagination
   const totalPages = Math.ceil(filteredProblems.length / pageSize) || 1;
   const paginatedProblems = filteredProblems.slice((page - 1) * pageSize, page * pageSize);
 
   const getDifficultyBadge = (diff: Difficulty) => {
     switch (diff) {
       case 'Beginner':
-        return <span className="text-[#00b8a3] font-semibold text-xs">Easy</span>;
+        return <span className="text-[#10b981] font-semibold text-xs">Easy</span>;
       case 'Intermediate':
-        return <span className="text-[#ffc01e] font-semibold text-xs">Medium</span>;
+        return <span className="text-[#f59e0b] font-semibold text-xs">Medium</span>;
       case 'Staff SRE':
-        return <span className="text-[#ff375f] font-semibold text-xs">Hard</span>;
+        return <span className="text-[#f43f5e] font-semibold text-xs">Hard</span>;
     }
   };
 
   return (
-    <div className="flex-1 min-h-0 w-full overflow-y-auto bg-[#0b0f17] text-slate-100">
+    <div className="flex-1 min-h-0 w-full overflow-y-auto bg-[var(--bg-canvas)] text-[var(--text-primary)]">
       {/* Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Top Hero & Study Plans Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           {/* Main Featured Study Plan Banner (8 Cols) */}
-          <div className="lg:col-span-8 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/40 border border-slate-800/80 p-6 flex flex-col justify-between relative overflow-hidden shadow-2xl">
-            {/* Ambient background glow */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 space-y-3">
+          <div className="lg:col-span-8 rounded-xl bg-[var(--bg-card)] border border-white/[0.08] p-6 flex flex-col justify-between relative overflow-hidden shadow-sm">
+            <div className="relative z-10 space-y-2.5">
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/40 text-emerald-300">
-                  FEATURED STUDY PLAN
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-[var(--accent-bg)] border border-[var(--accent)]/30 text-[var(--accent-light)]">
+                  FEATURED TRACK
                 </span>
-                <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                <span className="text-xs text-[var(--text-muted)] font-mono flex items-center gap-1">
                   <Flame className="w-3.5 h-3.5 text-amber-400" />
                   Most Popular for SRE Interviews
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                DevOps 75: Production Incident & Architecture Mastery
+              <h1 className="text-2xl font-bold tracking-tight text-white">
+                DevOps 75: Production Incident Mastery
               </h1>
-              <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
-                Master 100+ real-world production outages, broken Kubernetes pods, multi-stage Docker builds, Linux kernel inode leaks, Terraform cycles, and PromQL P99 alerting rules.
+              <p className="text-xs text-[var(--text-secondary)] max-w-xl leading-relaxed">
+                Triage and remediate 100+ real-world production outages, broken Kubernetes pods, Docker builds, Linux kernel inode leaks, Terraform cycles, and PromQL P99 alerting.
               </p>
             </div>
 
-            <div className="relative z-10 pt-6 flex flex-wrap items-center gap-4">
+            <div className="relative z-10 pt-5 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => selectChallenge('k8s-crashloop-oom')}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition"
+                className="px-4 py-2 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs shadow-sm flex items-center gap-1.5 transition"
               >
-                <span>Start Practicing Now</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Start Practicing</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={pickRandomProblem}
-                className="px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 font-semibold text-sm flex items-center gap-2 transition"
+                className="px-3.5 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1.5 transition"
               >
-                <Dices className="w-4 h-4 text-cyan-400" />
-                <span>Pick Random Incident</span>
+                <Dices className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <span>Shuffle Incident</span>
               </button>
             </div>
           </div>
 
           {/* User Stats Card (4 Cols) */}
-          <div className="lg:col-span-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 p-5 flex flex-col justify-between shadow-xl">
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold">
-                  S
-                </div>
-                <div>
-                  <div className="font-bold text-sm text-slate-200">Session Progress</div>
-                  <div className="text-[11px] text-slate-400 font-mono">SRE Candidate Level 3</div>
-                </div>
+          <div className="lg:col-span-4 rounded-xl bg-[var(--bg-card)] border border-white/[0.08] p-5 flex flex-col justify-between shadow-sm">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <div>
+                <div className="font-semibold text-xs text-white">Your Progress</div>
+                <div className="text-[11px] text-[var(--text-muted)] font-mono">SRE Candidate</div>
               </div>
 
-              <div className="flex items-center gap-1 text-amber-400 font-mono font-bold text-xs bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/30">
-                <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                <span>3 Day Streak</span>
+              <div className="flex items-center gap-1 text-amber-400 font-mono font-bold text-xs bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                <Flame className="w-3 h-3 fill-amber-400" />
+                <span>3 Days</span>
               </div>
             </div>
 
             {/* Stats Breakdown */}
-            <div className="py-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Total Solved:</span>
-                <span className="font-mono text-sm font-bold text-slate-100">
+            <div className="py-3 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--text-muted)]">Total Solved:</span>
+                <span className="font-mono font-bold text-white">
                   {solvedStats.solvedCount} / {solvedStats.total}
                 </span>
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden flex">
+              <div className="w-full bg-white/[0.06] h-1.5 rounded-full overflow-hidden flex">
                 <div 
-                  className="bg-[#00b8a3] h-full transition-all duration-500" 
+                  className="bg-[#10b981] h-full transition-all duration-500" 
                   style={{ width: `${(solvedStats.easySolved / solvedStats.total) * 100}%` }}
-                  title="Easy Solved"
                 />
                 <div 
-                  className="bg-[#ffc01e] h-full transition-all duration-500" 
+                  className="bg-[#f59e0b] h-full transition-all duration-500" 
                   style={{ width: `${(solvedStats.medSolved / solvedStats.total) * 100}%` }}
-                  title="Medium Solved"
                 />
                 <div 
-                  className="bg-[#ff375f] h-full transition-all duration-500" 
+                  className="bg-[#f43f5e] h-full transition-all duration-500" 
                   style={{ width: `${(solvedStats.hardSolved / solvedStats.total) * 100}%` }}
-                  title="Hard Solved"
                 />
               </div>
 
               {/* Difficulty breakdown rows */}
-              <div className="grid grid-cols-3 gap-2 pt-2 text-center text-[11px] font-mono">
-                <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800">
-                  <div className="text-[#00b8a3] font-bold">Easy</div>
-                  <div className="text-slate-300 font-semibold mt-0.5">
+              <div className="grid grid-cols-3 gap-2 pt-1 text-center text-[11px] font-mono">
+                <div className="bg-white/[0.03] p-1.5 rounded border border-white/[0.05]">
+                  <div className="text-[#10b981] font-semibold">Easy</div>
+                  <div className="text-[var(--text-secondary)] mt-0.5 font-bold">
                     {solvedStats.easySolved}/{solvedStats.easyTotal}
                   </div>
                 </div>
-                <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800">
-                  <div className="text-[#ffc01e] font-bold">Medium</div>
-                  <div className="text-slate-300 font-semibold mt-0.5">
+                <div className="bg-white/[0.03] p-1.5 rounded border border-white/[0.05]">
+                  <div className="text-[#f59e0b] font-semibold">Medium</div>
+                  <div className="text-[var(--text-secondary)] mt-0.5 font-bold">
                     {solvedStats.medSolved}/{solvedStats.medTotal}
                   </div>
                 </div>
-                <div className="bg-slate-950/60 p-2 rounded-lg border border-slate-800">
-                  <div className="text-[#ff375f] font-bold">Hard</div>
-                  <div className="text-slate-300 font-semibold mt-0.5">
+                <div className="bg-white/[0.03] p-1.5 rounded border border-white/[0.05]">
+                  <div className="text-[#f43f5e] font-semibold">Hard</div>
+                  <div className="text-[var(--text-secondary)] mt-0.5 font-bold">
                     {solvedStats.hardSolved}/{solvedStats.hardTotal}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between font-mono">
-              <span>Acceptance Rate:</span>
+            <div className="pt-2 border-t border-white/[0.06] text-[11px] text-[var(--text-muted)] flex items-center justify-between font-mono">
+              <span>Acceptance:</span>
               <span className="text-emerald-400 font-bold">54.8%</span>
             </div>
           </div>
         </div>
 
-        {/* Tracks Carousel Cards */}
-        <div className="space-y-3">
+        {/* Tracks Carousel */}
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              <span>Explore by Specialization Track</span>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+              <span>Specialization Tracks</span>
             </h2>
             <button
               onClick={() => setActiveTrackFilter('all')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-medium"
+              className="text-xs text-[var(--text-secondary)] hover:text-white transition font-medium"
             >
-              View All 100+ &rarr;
+              Reset Filters &rarr;
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
             {(Object.keys(TRACK_INFO) as OpsTrack[]).map(trackKey => {
               const info = TRACK_INFO[trackKey];
               const isSelected = activeTrackFilter === trackKey;
@@ -233,16 +210,16 @@ export const ProblemSetView: React.FC = () => {
                     setActiveTrackFilter(isSelected ? 'all' : trackKey);
                     setPage(1);
                   }}
-                  className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
+                  className={`p-3 rounded-lg border text-left transition flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-slate-800/90 border-cyan-500/60 shadow-lg shadow-cyan-500/10'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/40'
+                      ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                      : 'bg-[var(--bg-card)] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.03] text-[var(--text-secondary)]'
                   }`}
                 >
-                  <div className="text-2xl mb-2">{info.icon}</div>
+                  <div className="text-xl mb-1.5">{info.icon}</div>
                   <div>
-                    <div className="font-bold text-xs text-slate-100">{info.label}</div>
-                    <div className="text-[11px] text-slate-400 font-mono mt-0.5">{count} Problems</div>
+                    <div className="font-semibold text-xs text-white leading-snug">{info.label}</div>
+                    <div className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">{count} Problems</div>
                   </div>
                 </button>
               );
@@ -251,11 +228,11 @@ export const ProblemSetView: React.FC = () => {
         </div>
 
         {/* Filters & Search Toolbar */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-[var(--bg-card)] p-2 rounded-lg border border-white/[0.06]">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
@@ -263,21 +240,20 @@ export const ProblemSetView: React.FC = () => {
                   setSearchQuery(e.target.value);
                   setPage(1);
                 }}
-                placeholder="Search by title, tag (e.g. OOM, lsof, VPC, DNS, Probes)..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50"
+                placeholder="Search questions by keyword, tag (e.g. OOM, lsof, VPC, DNS)..."
+                className="w-full bg-[var(--bg-canvas)] border border-white/[0.08] rounded-md pl-8 pr-3 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-white/30"
               />
             </div>
 
             {/* Dropdown Filters */}
             <div className="flex items-center gap-2">
-              {/* Difficulty Filter */}
               <select
                 value={difficultyFilter}
                 onChange={e => {
                   setDifficultyFilter(e.target.value as any);
                   setPage(1);
                 }}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                className="bg-[var(--bg-canvas)] border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-[var(--text-secondary)] focus:outline-none focus:border-white/30 cursor-pointer"
               >
                 <option value="all">All Difficulties</option>
                 <option value="Beginner">Easy</option>
@@ -285,25 +261,23 @@ export const ProblemSetView: React.FC = () => {
                 <option value="Staff SRE">Hard</option>
               </select>
 
-              {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={e => {
                   setStatusFilter(e.target.value as any);
                   setPage(1);
                 }}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                className="bg-[var(--bg-canvas)] border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-[var(--text-secondary)] focus:outline-none focus:border-white/30 cursor-pointer"
               >
                 <option value="all">All Statuses</option>
                 <option value="todo">Unsolved</option>
                 <option value="solved">Solved</option>
               </select>
 
-              {/* Random Pick Button */}
               <button
                 onClick={pickRandomProblem}
-                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 border border-slate-700 transition"
-                title="Pick Random Problem"
+                className="p-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] text-[var(--text-secondary)] hover:text-white border border-white/[0.08] transition"
+                title="Shuffle Random Problem"
               >
                 <Dices className="w-4 h-4" />
               </button>
@@ -311,69 +285,64 @@ export const ProblemSetView: React.FC = () => {
           </div>
 
           {/* Problems Table */}
-          <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 overflow-hidden shadow-2xl">
+          <div className="rounded-xl border border-white/[0.08] bg-[var(--bg-card)] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-                    <th className="py-3 px-4 w-12 text-center">Status</th>
-                    <th className="py-3 px-3 w-14">#</th>
-                    <th className="py-3 px-4">Title & Specialization</th>
-                    <th className="py-3 px-4 w-28">Acceptance</th>
-                    <th className="py-3 px-4 w-28">Difficulty</th>
-                    <th className="py-3 px-4 w-32">Track</th>
-                    <th className="py-3 px-4 w-24 text-right">Action</th>
+                  <tr className="border-b border-white/[0.06] bg-white/[0.02] text-[var(--text-muted)] font-semibold uppercase text-[10px] tracking-wider font-mono">
+                    <th className="py-2.5 px-3 w-10 text-center">Status</th>
+                    <th className="py-2.5 px-2 w-10">#</th>
+                    <th className="py-2.5 px-3">Title</th>
+                    <th className="py-2.5 px-3 w-24">Acceptance</th>
+                    <th className="py-2.5 px-3 w-20">Difficulty</th>
+                    <th className="py-2.5 px-3 w-28">Track</th>
+                    <th className="py-2.5 px-3 w-20 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans">
+                <tbody className="divide-y divide-white/[0.04]">
                   {paginatedProblems.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-slate-500">
-                        No DevOps problems found matching criteria.
+                      <td colSpan={7} className="py-10 text-center text-[var(--text-muted)]">
+                        No DevOps questions found matching filters.
                       </td>
                     </tr>
                   ) : (
-                    paginatedProblems.map((prob, idx) => {
+                    paginatedProblems.map((prob) => {
                       const isSolved = solvedChallengeIds.includes(prob.id);
                       return (
                         <tr
                           key={prob.id}
                           onClick={() => selectChallenge(prob.id)}
-                          className={`group hover:bg-slate-800/50 cursor-pointer transition ${
-                            idx % 2 === 0 ? 'bg-slate-900/20' : 'bg-slate-950/20'
-                          }`}
+                          className="hover:bg-white/[0.03] cursor-pointer transition"
                         >
-                          {/* Status Icon */}
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-2.5 px-3 text-center">
                             {isSolved ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mx-auto" />
                             ) : (
-                              <Circle className="w-3.5 h-3.5 text-slate-600 mx-auto group-hover:text-slate-400" />
+                              <Circle className="w-3 h-3 text-white/20 mx-auto" />
                             )}
                           </td>
 
-                          {/* Problem Number */}
-                          <td className="py-3 px-3 font-mono text-slate-400 font-semibold">
+                          <td className="py-2.5 px-2 font-mono text-[var(--text-muted)] text-[11px]">
                             {prob.number}.
                           </td>
 
-                          {/* Title & Tags */}
-                          <td className="py-3 px-4">
+                          <td className="py-2.5 px-3">
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-slate-200 group-hover:text-cyan-300 transition">
+                              <span className="font-semibold text-[var(--text-primary)] hover:text-white transition">
                                 {prob.title}
                               </span>
                               {prob.hasInteractiveSandbox && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 border border-cyan-500/40 text-cyan-300 font-mono">
-                                  LIVE CLUSTER
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-white/[0.06] border border-white/10 text-zinc-300 font-mono">
+                                  SIMULATOR
                                 </span>
                               )}
                             </div>
-                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <div className="flex flex-wrap items-center gap-1 mt-0.5">
                               {prob.tags.slice(0, 3).map(tag => (
                                 <span
                                   key={tag}
-                                  className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-750"
+                                  className="text-[9px] px-1 py-0.2 rounded bg-white/[0.04] text-[var(--text-muted)] font-mono"
                                 >
                                   {tag}
                                 </span>
@@ -381,32 +350,28 @@ export const ProblemSetView: React.FC = () => {
                             </div>
                           </td>
 
-                          {/* Acceptance Rate */}
-                          <td className="py-3 px-4 font-mono text-slate-400">
+                          <td className="py-2.5 px-3 font-mono text-[var(--text-muted)] text-[11px]">
                             {prob.acceptanceRate}
                           </td>
 
-                          {/* Difficulty */}
-                          <td className="py-3 px-4">
+                          <td className="py-2.5 px-3">
                             {getDifficultyBadge(prob.difficulty)}
                           </td>
 
-                          {/* Track */}
-                          <td className="py-3 px-4">
-                            <span className="text-slate-300 text-xs flex items-center gap-1.5">
+                          <td className="py-2.5 px-3">
+                            <span className="text-[var(--text-secondary)] text-xs flex items-center gap-1.5">
                               <span>{TRACK_INFO[prob.track].icon}</span>
                               <span className="hidden sm:inline">{TRACK_INFO[prob.track].label}</span>
                             </span>
                           </td>
 
-                          {/* Action */}
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-2.5 px-3 text-right">
                             <button
                               onClick={e => {
                                 e.stopPropagation();
                                 selectChallenge(prob.id);
                               }}
-                              className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-800 group-hover:bg-cyan-500 group-hover:text-slate-950 text-slate-300 transition"
+                              className="px-2 py-0.5 rounded text-[11px] font-medium bg-white/[0.06] hover:bg-white hover:text-black text-[var(--text-secondary)] transition"
                             >
                               Solve
                             </button>
@@ -420,28 +385,28 @@ export const ProblemSetView: React.FC = () => {
             </div>
 
             {/* Pagination Controls */}
-            <div className="px-4 py-3 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-xs text-slate-400 font-mono">
+            <div className="px-4 py-2.5 border-t border-white/[0.06] bg-white/[0.01] flex items-center justify-between text-xs text-[var(--text-muted)] font-mono">
               <div>
-                Showing {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, filteredProblems.length)} of {filteredProblems.length} problems
+                Showing {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, filteredProblems.length)} of {filteredProblems.length}
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   disabled={page <= 1}
                   onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-slate-300 flex items-center gap-1 transition"
+                  className="px-2.5 py-1 rounded bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 text-[var(--text-secondary)] flex items-center gap-1 transition"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <ChevronLeft className="w-3 h-3" />
                   <span>Prev</span>
                 </button>
-                <span>Page {page} of {totalPages}</span>
+                <span>Page {page} / {totalPages}</span>
                 <button
                   disabled={page >= totalPages}
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  className="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 text-slate-300 flex items-center gap-1 transition"
+                  className="px-2.5 py-1 rounded bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 text-[var(--text-secondary)] flex items-center gap-1 transition"
                 >
                   <span>Next</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             </div>

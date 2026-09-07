@@ -18,6 +18,8 @@ interface OpsContextType {
   setDifficultyFilter: (diff: Difficulty | 'all') => void;
   statusFilter: 'all' | 'solved' | 'todo';
   setStatusFilter: (status: 'all' | 'solved' | 'todo') => void;
+  theme: 'linear' | 'vercel' | 'github' | 'supabase';
+  setTheme: (t: 'linear' | 'vercel' | 'github' | 'supabase') => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   pickRandomProblem: () => void;
@@ -63,6 +65,27 @@ export const OpsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTrackFilter, setActiveTrackFilter] = useState<OpsTrack | 'all'>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'todo'>('all');
+  const [theme, setThemeState] = useState<'linear' | 'vercel' | 'github' | 'supabase'>(() => {
+    try {
+      const saved = localStorage.getItem('opsforge_theme');
+      return (saved as any) || 'linear';
+    } catch {
+      return 'linear';
+    }
+  });
+
+  const setTheme = (t: 'linear' | 'vercel' | 'github' | 'supabase') => {
+    setThemeState(t);
+    try {
+      localStorage.setItem('opsforge_theme', t);
+    } catch {}
+    document.documentElement.setAttribute('data-theme', t);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Files for active challenge
@@ -467,6 +490,8 @@ spec:
         setDifficultyFilter,
         statusFilter,
         setStatusFilter,
+        theme,
+        setTheme,
         searchQuery,
         setSearchQuery,
         pickRandomProblem,
