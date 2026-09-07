@@ -49,7 +49,7 @@ export const OpsNavbar: React.FC = () => {
   const nextProblem = currentIdx < allProblems.length - 1 ? allProblems[currentIdx + 1] : null;
 
   const themesList = [
-    { id: 'linear', name: 'Linear Dark', desc: 'Titanium & Violet', color: '#6366f1' },
+    { id: 'linear', name: 'Linear Titanium', desc: 'Deep Neutral Zinc', color: '#e4e4e7' },
     { id: 'vercel', name: 'Vercel Black', desc: 'Pure Monochrome', color: '#ffffff' },
     { id: 'github', name: 'GitHub Dimmed', desc: 'Classic Developer', color: '#539bf5' },
     { id: 'supabase', name: 'Supabase Emerald', desc: 'Carbon & Mint', color: '#10b981' }
@@ -250,7 +250,7 @@ export const OpsNavbar: React.FC = () => {
         </div>
 
         {/* User Avatar */}
-        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-[11px] select-none shadow-sm">
+        <div className="w-6 h-6 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-200 font-bold text-[11px] select-none">
           S
         </div>
       </div>

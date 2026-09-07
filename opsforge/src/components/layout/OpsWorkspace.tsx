@@ -77,7 +77,7 @@ export const OpsWorkspace: React.FC = () => {
                       : 'border-transparent text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
-                  <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                  <Layers className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Cluster Topology</span>
                 </button>
 
@@ -89,7 +89,7 @@ export const OpsWorkspace: React.FC = () => {
                       : 'border-transparent text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
-                  <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />
+                  <TerminalIcon className="w-3.5 h-3.5 text-zinc-400" />
                   <span>SRE Terminal</span>
                 </button>
 
@@ -101,7 +101,7 @@ export const OpsWorkspace: React.FC = () => {
                       : 'border-transparent text-[var(--text-muted)] hover:text-white'
                   }`}
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Test Results</span>
                   {gradeSummary.status !== 'idle' && (
                     <span className={`text-[10px] font-mono px-1.5 rounded-full ${

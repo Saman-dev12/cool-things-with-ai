@@ -8,17 +8,17 @@
   :root {
     /* Default: Titanium Linear Theme */
     --bg-canvas: #09090b;
-    --bg-panel: #121215;
-    --bg-card: #18181c;
-    --bg-hover: #222227;
+    --bg-panel: #111114;
+    --bg-card: #16161a;
+    --bg-hover: #222228;
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-medium: rgba(255, 255, 255, 0.14);
+    --border-medium: rgba(255, 255, 255, 0.16);
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
-    --accent: #6366f1;
-    --accent-light: #818cf8;
-    --accent-bg: rgba(99, 102, 241, 0.12);
+    --accent: #ffffff;
+    --accent-light: #fafafa;
+    --accent-bg: rgba(255, 255, 255, 0.08);
   }
 
   [data-theme="vercel"] {

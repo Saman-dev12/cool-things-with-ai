@@ -73,7 +73,7 @@ export const ClusterVisualizer: React.FC = () => {
           onClick={simulateTraffic}
           className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/[0.06] hover:bg-white/[0.1] text-zinc-300 transition"
         >
-          <Radio className={`w-3 h-3 text-cyan-400 ${trafficPulsing ? 'animate-ping' : ''}`} />
+          <Radio className={`w-3 h-3 text-zinc-300 ${trafficPulsing ? 'animate-ping' : ''}`} />
           <span>Probe</span>
         </button>
       </div>
@@ -105,7 +105,7 @@ export const ClusterVisualizer: React.FC = () => {
           <div className="w-full bg-white/10 h-1 rounded-full mt-1 overflow-hidden">
             <div
               className={`h-full transition-all duration-500 ${
-                topology.memTotal > 80 ? 'bg-amber-400' : 'bg-indigo-400'
+                topology.memTotal > 80 ? 'bg-amber-400' : 'bg-zinc-400'
               }`}
               style={{ width: `${Math.min(100, topology.memTotal)}%` }}
             />
