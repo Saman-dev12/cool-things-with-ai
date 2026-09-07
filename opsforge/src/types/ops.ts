@@ -8,6 +8,7 @@ export type OpsTrack =
 
 export type Severity = 'SEV-1' | 'SEV-2' | 'SEV-3';
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Staff SRE';
+export type ViewMode = 'problemset' | 'workspace';
 
 export interface OpsFile {
   name: string;

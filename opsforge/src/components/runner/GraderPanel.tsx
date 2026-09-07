@@ -8,7 +8,7 @@ export const GraderPanel: React.FC = () => {
   const isSolved = solvedChallengeIds.includes(currentChallenge.id);
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-full bg-transparent overflow-hidden">
       {/* Grader Header */}
       <div className="p-3 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
         <div className="flex items-center gap-2">

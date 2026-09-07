@@ -81,7 +81,7 @@ export const OpsTerminal: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-2xl font-mono text-xs">
+    <div className="flex flex-col h-full bg-transparent overflow-hidden font-mono text-xs">
       {/* Terminal Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center gap-2">
