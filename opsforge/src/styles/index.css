@@ -5,8 +5,26 @@
     box-sizing: border-box;
   }
 
-  :root {
-    /* Default: Titanium Linear Theme */
+  :root, [data-theme="leetcode"] {
+    /* Default: Authentic LeetCode Dark Mode */
+    --bg-canvas: #1a1a1a;
+    --bg-panel: #262626;
+    --bg-card: #282828;
+    --bg-hover: #333333;
+    --border-subtle: #383838;
+    --border-medium: #4a4a4a;
+    --text-primary: #eff1f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --accent: #ffa116;
+    --accent-light: #ffb84d;
+    --accent-bg: rgba(255, 161, 22, 0.12);
+    --lc-easy: #00b8a3;
+    --lc-medium: #ffc01e;
+    --lc-hard: #ff375f;
+  }
+
+  [data-theme="linear"] {
     --bg-canvas: #09090b;
     --bg-panel: #111114;
     --bg-card: #16161a;
@@ -19,6 +37,9 @@
     --accent: #ffffff;
     --accent-light: #fafafa;
     --accent-bg: rgba(255, 255, 255, 0.08);
+    --lc-easy: #10b981;
+    --lc-medium: #f59e0b;
+    --lc-hard: #f43f5e;
   }
 
   [data-theme="vercel"] {
@@ -34,6 +55,9 @@
     --accent: #ffffff;
     --accent-light: #eaeaea;
     --accent-bg: rgba(255, 255, 255, 0.1);
+    --lc-easy: #00b8a3;
+    --lc-medium: #ffc01e;
+    --lc-hard: #ff375f;
   }
 
   [data-theme="github"] {
@@ -49,21 +73,9 @@
     --accent: #539bf5;
     --accent-light: #6cb6ff;
     --accent-bg: rgba(83, 155, 245, 0.12);
-  }
-
-  [data-theme="supabase"] {
-    --bg-canvas: #0e1011;
-    --bg-panel: #15181a;
-    --bg-card: #1c2022;
-    --bg-hover: #24292c;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-medium: rgba(255, 255, 255, 0.14);
-    --text-primary: #ededed;
-    --text-secondary: #909090;
-    --text-muted: #666666;
-    --accent: #10b981;
-    --accent-light: #34d399;
-    --accent-bg: rgba(16, 185, 129, 0.12);
+    --lc-easy: #34d399;
+    --lc-medium: #fbbf24;
+    --lc-hard: #f87171;
   }
   
   html, body, #root {

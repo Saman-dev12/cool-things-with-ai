@@ -18,8 +18,8 @@ interface OpsContextType {
   setDifficultyFilter: (diff: Difficulty | 'all') => void;
   statusFilter: 'all' | 'solved' | 'todo';
   setStatusFilter: (status: 'all' | 'solved' | 'todo') => void;
-  theme: 'linear' | 'vercel' | 'github' | 'supabase';
-  setTheme: (t: 'linear' | 'vercel' | 'github' | 'supabase') => void;
+  theme: 'leetcode' | 'linear' | 'vercel' | 'github';
+  setTheme: (t: 'leetcode' | 'linear' | 'vercel' | 'github') => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   pickRandomProblem: () => void;
@@ -65,16 +65,16 @@ export const OpsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTrackFilter, setActiveTrackFilter] = useState<OpsTrack | 'all'>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'todo'>('all');
-  const [theme, setThemeState] = useState<'linear' | 'vercel' | 'github' | 'supabase'>(() => {
+  const [theme, setThemeState] = useState<'leetcode' | 'linear' | 'vercel' | 'github'>(() => {
     try {
       const saved = localStorage.getItem('opsforge_theme');
-      return (saved as any) || 'linear';
+      return (saved as any) || 'leetcode';
     } catch {
-      return 'linear';
+      return 'leetcode';
     }
   });
 
-  const setTheme = (t: 'linear' | 'vercel' | 'github' | 'supabase') => {
+  const setTheme = (t: 'leetcode' | 'linear' | 'vercel' | 'github') => {
     setThemeState(t);
     try {
       localStorage.setItem('opsforge_theme', t);

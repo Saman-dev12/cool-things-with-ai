@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useOps } from '../../context/OpsContext';
-import { Copy, Check, FileCode, RotateCcw } from 'lucide-react';
+import { Copy, Check, FileCode, RotateCcw, ChevronDown } from 'lucide-react';
 
 export const OpsEditor: React.FC = () => {
   const {
@@ -8,7 +8,8 @@ export const OpsEditor: React.FC = () => {
     selectedFileName,
     setSelectedFileName,
     updateFileContent,
-    resetFiles
+    resetFiles,
+    currentChallenge
   } = useOps();
 
   const [copied, setCopied] = useState(false);
@@ -39,62 +40,78 @@ export const OpsEditor: React.FC = () => {
     }
   };
 
+  const getLanguageName = () => {
+    if (selectedFileName.endsWith('.yaml') || selectedFileName.endsWith('.yml')) return 'YAML';
+    if (selectedFileName.endsWith('.tf')) return 'HCL / Terraform';
+    if (selectedFileName.endsWith('.sh') || selectedFileName === 'entrypoint.sh') return 'Bash Shell';
+    if (selectedFileName === 'Dockerfile') return 'Dockerfile';
+    return 'Configuration';
+  };
+
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-panel)] border border-white/[0.08] rounded-xl overflow-hidden shadow-sm">
-      {/* File Tabs Bar */}
-      <div className="flex items-center justify-between bg-[var(--bg-panel)] border-b border-white/[0.06] px-2 pt-2">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          {Object.keys(files).map(fileName => {
-            const isSelected = fileName === selectedFileName;
-            return (
-              <button
-                key={fileName}
-                onClick={() => setSelectedFileName(fileName)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-t-md text-xs font-mono font-medium transition border-t border-x ${
-                  isSelected
-                    ? 'bg-[var(--bg-card)] border-white/[0.08] text-white border-b-transparent shadow-sm'
-                    : 'border-transparent text-[var(--text-muted)] hover:text-white hover:bg-white/[0.03]'
-                }`}
-              >
-                <FileCode className="w-3.5 h-3.5 text-zinc-400" />
-                <span>{fileName}</span>
-              </button>
-            );
-          })}
+    <div className="flex flex-col h-full bg-[#262626] border border-[#383838] rounded-lg overflow-hidden shadow-sm">
+      {/* Editor Top Bar (LeetCode Style) */}
+      <div className="flex items-center justify-between bg-[#262626] border-b border-[#383838] px-3 py-1.5 text-xs">
+        {/* Left: Language & File Selector */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#333333] text-[#eff1f6] font-medium text-[11px] border border-[#444]">
+            <span>{getLanguageName()}</span>
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
+          </div>
+
+          <div className="flex items-center gap-1">
+            {Object.keys(files).map(fileName => {
+              const isSelected = fileName === selectedFileName;
+              return (
+                <button
+                  key={fileName}
+                  onClick={() => setSelectedFileName(fileName)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition ${
+                    isSelected
+                      ? 'bg-[#1e1e1e] text-white font-medium border border-[#383838]'
+                      : 'text-zinc-400 hover:text-white hover:bg-[#303030]'
+                  }`}
+                >
+                  <FileCode className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>{fileName}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Editor Actions */}
-        <div className="flex items-center gap-1 pb-1.5">
+        {/* Right: Actions (Copy, Reset) */}
+        <div className="flex items-center gap-1.5">
           <button
             onClick={resetFiles}
-            className="p-1 rounded text-[var(--text-muted)] hover:text-white hover:bg-white/[0.06] transition"
-            title="Reset file content"
+            className="p-1 rounded text-zinc-400 hover:text-white hover:bg-[#333333] transition"
+            title="Reset code to starter template"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-white/[0.06] hover:bg-white/[0.1] text-[var(--text-secondary)] hover:text-white border border-white/[0.06] transition"
-            title="Copy file code"
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs text-zinc-300 hover:text-white hover:bg-[#333333] transition"
+            title="Copy code"
           >
-            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            {copied ? <Check className="w-3 h-3 text-[#00b8a3]" /> : <Copy className="w-3 h-3" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
       </div>
 
-      {/* Editor Body with Line Numbers */}
-      <div className="relative flex-1 min-h-0 flex overflow-hidden bg-[var(--bg-card)] font-mono text-xs">
+      {/* Editor Body */}
+      <div className="relative flex-1 min-h-0 flex overflow-hidden bg-[#1e1e1e] font-mono text-[13px]">
         {/* Line Numbers Gutter */}
-        <div className="select-none py-3 px-3 bg-[var(--bg-card)] text-zinc-600 text-right border-r border-white/[0.06] w-12 shrink-0 overflow-hidden">
+        <div className="select-none py-3 px-3 bg-[#1e1e1e] text-zinc-600 text-right border-r border-[#2e2e2e] w-12 shrink-0 overflow-hidden">
           {lines.map((_, idx) => (
-            <div key={idx} className="leading-6 text-[11px]">
+            <div key={idx} className="leading-6 text-xs">
               {idx + 1}
             </div>
           ))}
         </div>
 
-        {/* Code Input Textarea */}
+        {/* Textarea Code Input */}
         <textarea
           value={activeContent}
           onChange={e => updateFileContent(selectedFileName, e.target.value)}
@@ -102,20 +119,20 @@ export const OpsEditor: React.FC = () => {
           spellCheck={false}
           autoCapitalize="off"
           autoComplete="off"
-          className="flex-1 w-full h-full p-3 bg-transparent text-zinc-200 leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-white/20 selection:text-white overflow-y-auto"
-          placeholder="Edit manifest or script..."
+          className="flex-1 w-full h-full p-3 bg-transparent text-[#eff1f6] leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-zinc-700 selection:text-white overflow-y-auto"
+          placeholder="Write or remediate configuration here..."
         />
       </div>
 
       {/* Editor Footer Status Bar */}
-      <div className="px-3 py-1 bg-[var(--bg-panel)] border-t border-white/[0.06] text-[10px] font-mono text-[var(--text-muted)] flex items-center justify-between">
+      <div className="px-3 py-1 bg-[#262626] border-t border-[#333333] text-[11px] font-mono text-zinc-400 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span>{selectedFileName}</span>
           <span>{lines.length} lines</span>
           <span>UTF-8</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00b8a3] inline-block"></span>
           <span>Spaces: 2</span>
         </div>
       </div>

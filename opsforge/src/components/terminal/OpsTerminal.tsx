@@ -64,28 +64,28 @@ export const OpsTerminal: React.FC = () => {
   };
 
   const colorizeLine = (line: string) => {
-    if (line.startsWith('sre@opsforge-prod:~$')) {
+    if (line.startsWith('sre@opsforge-prod:~$') || line.startsWith('sre@opsforge:~$')) {
       return 'text-white font-semibold';
     }
     if (line.includes('Error') || line.includes('CrashLoopBackOff') || line.includes('OOMKilled') || line.includes('FAIL')) {
-      return 'text-rose-400';
+      return 'text-[#ff375f]';
     }
     if (line.includes('Warning') || line.includes('BackOff')) {
-      return 'text-amber-400';
+      return 'text-[#ffc01e]';
     }
     if (line.includes('Running') || line.includes('Success') || line.includes('PASSED') || line.includes('200 OK')) {
-      return 'text-emerald-400';
+      return 'text-[#00b8a3]';
     }
     return 'text-zinc-300';
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-card)] overflow-hidden font-mono text-xs">
+    <div className="flex flex-col h-full bg-[#1e1e1e] overflow-hidden font-mono text-xs">
       {/* Terminal Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/[0.06] bg-[var(--bg-panel)]">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#383838] bg-[#262626]">
         <div className="flex items-center gap-2">
           <TerminalIcon className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="text-zinc-300 font-medium text-[11px]">sre-shell</span>
+          <span className="text-zinc-300 font-medium text-xs">Terminal</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export const OpsTerminal: React.FC = () => {
               <button
                 key={cmd}
                 onClick={() => runCommand(cmd)}
-                className="px-2 py-0.5 rounded text-[10px] bg-white/[0.04] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-white border border-white/[0.06] transition"
+                className="px-2 py-0.5 rounded text-[11px] bg-[#333333] hover:bg-[#3d3d3d] text-zinc-300 hover:text-white border border-[#444] transition"
               >
                 {cmd}
               </button>
@@ -106,7 +106,7 @@ export const OpsTerminal: React.FC = () => {
             className="p-1 rounded text-zinc-500 hover:text-white transition"
             title="Clear terminal"
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -114,7 +114,7 @@ export const OpsTerminal: React.FC = () => {
       {/* Terminal Output */}
       <div
         ref={scrollRef}
-        className="flex-1 p-3 overflow-y-auto space-y-1 bg-black/40 selection:bg-white/20 selection:text-white text-[11px]"
+        className="flex-1 p-3 overflow-y-auto space-y-1 bg-[#141414] selection:bg-zinc-700 selection:text-white text-xs font-mono"
       >
         {terminalHistory.map((line, idx) => (
           <div key={idx} className={`leading-relaxed whitespace-pre-wrap ${colorizeLine(line)}`}>
@@ -126,9 +126,9 @@ export const OpsTerminal: React.FC = () => {
       {/* Terminal Command Input Form */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-panel)] border-t border-white/[0.06]"
+        className="flex items-center gap-2 px-3 py-2 bg-[#1e1e1e] border-t border-[#333333]"
       >
-        <span className="text-emerald-400 font-bold select-none text-[11px]">sre@opsforge:~$</span>
+        <span className="text-[#00b8a3] font-bold select-none text-xs">sre@opsforge:~$</span>
         <input
           type="text"
           value={inputVal}
@@ -140,6 +140,7 @@ export const OpsTerminal: React.FC = () => {
         <button
           type="submit"
           className="p-1 rounded text-zinc-400 hover:text-white transition"
+          title="Execute"
         >
           <CornerDownLeft className="w-3.5 h-3.5" />
         </button>
