@@ -44,7 +44,7 @@ export const OpsNavbar: React.FC = () => {
   const nextProblem = currentIdx < allProblems.length - 1 ? allProblems[currentIdx + 1] : null;
 
   return (
-    <header className="sticky top-0 z-40 px-4 py-2 border-b border-slate-800/90 bg-[#090d16]/95 backdrop-blur-md flex items-center justify-between text-xs">
+    <header className="h-12 shrink-0 z-40 px-4 border-b border-slate-800/90 bg-[#090d16]/95 backdrop-blur-md flex items-center justify-between text-xs">
       {/* Left: Brand & Navigation Links */}
       <div className="flex items-center gap-5">
         {/* Brand */}

@@ -7,9 +7,11 @@ import { OpsWorkspace } from './components/layout/OpsWorkspace';
 function MainContent() {
   const { viewMode } = useOps();
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col antialiased selection:bg-cyan-500/30 selection:text-white">
+    <div className="h-screen w-screen max-h-screen max-w-screen overflow-hidden flex flex-col bg-[#0b0f17] text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-white">
       <OpsNavbar />
-      {viewMode === 'problemset' ? <ProblemSetView /> : <OpsWorkspace />}
+      <div className="flex-1 min-h-0 w-full overflow-hidden flex flex-col">
+        {viewMode === 'problemset' ? <ProblemSetView /> : <OpsWorkspace />}
+      </div>
     </div>
   );
 }

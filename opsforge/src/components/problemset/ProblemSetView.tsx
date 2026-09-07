@@ -80,7 +80,7 @@ export const ProblemSetView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[#0b0f17] text-slate-100">
+    <div className="flex-1 min-h-0 w-full overflow-y-auto bg-[#0b0f17] text-slate-100">
       {/* Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {/* Top Hero & Study Plans Section */}

@@ -85,7 +85,7 @@ export const OpsEditor: React.FC = () => {
       </div>
 
       {/* Editor Body with Line Numbers */}
-      <div className="relative flex-1 flex overflow-hidden bg-slate-950 font-mono text-xs">
+      <div className="relative flex-1 min-h-0 flex overflow-hidden bg-slate-950 font-mono text-xs">
         {/* Line Numbers Gutter */}
         <div className="select-none py-3 px-3 bg-slate-950 text-slate-600 text-right border-r border-slate-800/80 w-12 shrink-0">
           {lines.map((_, idx) => (

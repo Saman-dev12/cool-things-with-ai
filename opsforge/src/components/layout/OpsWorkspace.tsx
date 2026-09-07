@@ -14,7 +14,7 @@ export const OpsWorkspace: React.FC = () => {
   const [mobileTab, setMobileTab] = useState<'briefing' | 'editor' | 'console'>('editor');
 
   return (
-    <main className="flex-1 p-3 overflow-hidden flex flex-col h-[calc(100vh-53px)] bg-[#0b0f17]">
+    <main className="flex-1 min-h-0 w-full p-2.5 overflow-hidden flex flex-col bg-[#0b0f17]">
       {/* Mobile Tab Switcher */}
       <div className="flex lg:hidden items-center justify-around bg-slate-900 border border-slate-800 rounded-lg p-1 mb-2 shrink-0">
         <button
