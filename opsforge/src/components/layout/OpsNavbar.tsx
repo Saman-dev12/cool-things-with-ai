@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOps } from '../../context/OpsContext';
 import { 
   Code2, 
@@ -10,8 +10,9 @@ import {
   BookOpen, 
   RotateCcw, 
   Clock, 
-  Palette, 
-  Check,
+  Settings, 
+  Maximize2,
+  Minimize2,
   CheckCircle2,
   Send
 } from 'lucide-react';
@@ -30,11 +31,35 @@ export const OpsNavbar: React.FC = () => {
     resetFiles,
     setShowPostMortem,
     pickRandomProblem,
-    theme,
-    setTheme
+    setShowSettingsModal
   } = useOps();
 
-  const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Global Keyboard Shortcuts (Ctrl + Enter = Submit, Ctrl + ' = Run)
+  useEffect(() => {
+    const handleGlobalKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        deployFix();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "'") {
+        e.preventDefault();
+        runDiagnostics();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKey);
+    return () => window.removeEventListener('keydown', handleGlobalKey);
+  }, [deployFix, runDiagnostics]);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
 
   const formatTimer = (totalSec: number) => {
     const mins = Math.floor(totalSec / 60);
@@ -48,16 +73,9 @@ export const OpsNavbar: React.FC = () => {
   const prevProblem = currentIdx > 0 ? allProblems[currentIdx - 1] : null;
   const nextProblem = currentIdx < allProblems.length - 1 ? allProblems[currentIdx + 1] : null;
 
-  const themesList = [
-    { id: 'leetcode', name: 'LeetCode Dark', desc: 'Official Carbon', color: '#ffa116' },
-    { id: 'linear', name: 'Linear Titanium', desc: 'Neutral Charcoal', color: '#e4e4e7' },
-    { id: 'vercel', name: 'Vercel Black', desc: 'Pitch Black', color: '#ffffff' },
-    { id: 'github', name: 'GitHub Dimmed', desc: 'Developer Slate', color: '#539bf5' }
-  ] as const;
-
   return (
-    <header className="h-12 shrink-0 z-40 px-4 border-b border-[#333333] bg-[#262626] flex items-center justify-between text-xs select-none">
-      {/* Left: Brand & Nav Links */}
+    <header className="h-12 shrink-0 z-40 px-4 border-b border-[#383838] bg-[#262626] flex items-center justify-between text-xs select-none shadow-sm">
+      {/* Left: Brand & Navigation */}
       <div className="flex items-center gap-6">
         {/* LeetCode-style Brand */}
         <div 
@@ -77,7 +95,7 @@ export const OpsNavbar: React.FC = () => {
           </div>
         </div>
 
-        {/* LeetCode Global Tabs */}
+        {/* Global Navigation Tabs */}
         <nav className="flex items-center gap-1">
           <button
             onClick={() => setViewMode('problemset')}
@@ -105,7 +123,7 @@ export const OpsNavbar: React.FC = () => {
           </button>
         </nav>
 
-        {/* In-Workspace Navigation Breadcrumbs */}
+        {/* In-Workspace Breadcrumb Navigation */}
         {viewMode === 'workspace' && (
           <div className="hidden md:flex items-center gap-2 pl-4 border-l border-[#3a3a3a] text-zinc-400">
             <button
@@ -142,45 +160,22 @@ export const OpsNavbar: React.FC = () => {
               </button>
             </div>
 
-            <span className="font-medium text-[#eff1f6] truncate max-w-[260px]">
+            <span className="font-medium text-[#eff1f6] truncate max-w-[240px]">
               {currentIdx + 1}. {currentChallenge.title}
             </span>
           </div>
         )}
       </div>
 
-      {/* Right: Actions, Timer, Profile */}
+      {/* Center / Right: Run & Submit & Actions */}
       <div className="flex items-center gap-2.5">
         {viewMode === 'workspace' && (
           <>
-            {/* SLA / Stopwatch Timer */}
-            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#1e1e1e] border border-[#333333] font-mono text-[11px] text-zinc-300">
-              <Clock className="w-3.5 h-3.5 text-zinc-400" />
-              <span>{formatTimer(slaSeconds)}</span>
-            </div>
-
-            {/* Editorial / Solution */}
-            <button
-              onClick={() => setShowPostMortem(true)}
-              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] text-zinc-300 hover:text-white transition"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-[#ffa116]" />
-              <span>Editorial</span>
-            </button>
-
-            {/* Reset */}
-            <button
-              onClick={resetFiles}
-              className="p-1.5 rounded bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] text-zinc-400 hover:text-white transition"
-              title="Reset starter code"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-
             {/* Run Button (LeetCode Gray Button) */}
             <button
               onClick={runDiagnostics}
-              className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] font-medium text-[#eff1f6] transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] font-medium text-[#eff1f6] transition"
+              title="Run Code (Ctrl + ')"
             >
               <Play className="w-3 h-3 text-zinc-300 fill-zinc-300" />
               <span>Run</span>
@@ -189,7 +184,8 @@ export const OpsNavbar: React.FC = () => {
             {/* Submit Button (LeetCode Green Button) */}
             <button
               onClick={deployFix}
-              className="flex items-center gap-1.5 px-3.5 py-1 rounded font-semibold text-white transition shadow-sm bg-[#00b8a3] hover:bg-[#00a390]"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md font-semibold text-white transition shadow-sm bg-[#00b8a3] hover:bg-[#00a390]"
+              title="Submit Solution (Ctrl + Enter)"
             >
               {isSolved ? (
                 <>
@@ -203,49 +199,50 @@ export const OpsNavbar: React.FC = () => {
                 </>
               )}
             </button>
+
+            {/* Stopwatch Timer */}
+            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#1e1e1e] border border-[#333333] font-mono text-[11px] text-zinc-300">
+              <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              <span>{formatTimer(slaSeconds)}</span>
+            </div>
+
+            {/* Editorial Button */}
+            <button
+              onClick={() => setShowPostMortem(true)}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] text-zinc-300 hover:text-white transition"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-[#ffa116]" />
+              <span>Editorial</span>
+            </button>
+
+            {/* Reset */}
+            <button
+              onClick={resetFiles}
+              className="p-1.5 rounded bg-[#333333] hover:bg-[#3d3d3d] border border-[#444] text-zinc-400 hover:text-white transition"
+              title="Reset starter files"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
           </>
         )}
 
-        {/* Theme Palette Switcher */}
-        <div className="relative">
-          <button
-            onClick={() => setThemeDropdownOpen(!themeDropdownOpen)}
-            className="p-1.5 rounded hover:bg-[#333333] text-zinc-400 hover:text-white transition"
-            title="Theme Palette"
-          >
-            <Palette className="w-3.5 h-3.5" />
-          </button>
+        {/* Settings Gear Icon (LeetCode Style) */}
+        <button
+          onClick={() => setShowSettingsModal(true)}
+          className="p-1.5 rounded hover:bg-[#333333] text-zinc-400 hover:text-white transition"
+          title="Settings"
+        >
+          <Settings className="w-4 h-4" />
+        </button>
 
-          {themeDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[#262626] border border-[#383838] shadow-2xl p-1.5 z-50">
-              <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold">
-                Theme
-              </div>
-              <div className="space-y-0.5">
-                {themesList.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => {
-                      setTheme(t.id as any);
-                      setThemeDropdownOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs transition ${
-                      theme === t.id
-                        ? 'bg-[#333333] text-white font-medium'
-                        : 'text-zinc-400 hover:bg-[#2e2e2e] hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: t.color }} />
-                      <span>{t.name}</span>
-                    </div>
-                    {theme === t.id && <Check className="w-3 h-3 text-white" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Fullscreen Toggle */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-1.5 rounded hover:bg-[#333333] text-zinc-400 hover:text-white transition hidden sm:block"
+          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+        >
+          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </button>
 
         {/* Streak Counter */}
         <div className="flex items-center gap-1 font-mono text-[#ffa116] font-bold px-2 py-0.5 rounded bg-[#ffa116]/10 border border-[#ffa116]/20 text-[11px]">

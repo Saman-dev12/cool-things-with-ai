@@ -110,3 +110,12 @@ export interface OpsChallenge {
   postMortem: PostMortem;
   initialTerminalLogs?: string[];
 }
+
+export interface EditorSettings {
+  fontSize: number;
+  tabSize: number;
+  fontFamily: string;
+  wordWrap: boolean;
+  showLineNumbers: boolean;
+}
+

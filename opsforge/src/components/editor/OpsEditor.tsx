@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useOps } from '../../context/OpsContext';
-import { Copy, Check, FileCode, RotateCcw, ChevronDown } from 'lucide-react';
+import { Copy, Check, FileCode, RotateCcw, ChevronDown, Settings } from 'lucide-react';
 
 export const OpsEditor: React.FC = () => {
   const {
@@ -9,7 +9,8 @@ export const OpsEditor: React.FC = () => {
     setSelectedFileName,
     updateFileContent,
     resetFiles,
-    currentChallenge
+    editorSettings,
+    setShowSettingsModal
   } = useOps();
 
   const [copied, setCopied] = useState(false);
@@ -31,11 +32,12 @@ export const OpsEditor: React.FC = () => {
       const target = e.currentTarget;
       const start = target.selectionStart;
       const end = target.selectionEnd;
-      const newContent = activeContent.substring(0, start) + '  ' + activeContent.substring(end);
+      const spaces = ' '.repeat(editorSettings.tabSize || 2);
+      const newContent = activeContent.substring(0, start) + spaces + activeContent.substring(end);
       updateFileContent(selectedFileName, newContent);
 
       setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 2;
+        target.selectionStart = target.selectionEnd = start + (editorSettings.tabSize || 2);
       }, 0);
     }
   };
@@ -51,7 +53,7 @@ export const OpsEditor: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-[#262626] border border-[#383838] rounded-lg overflow-hidden shadow-sm">
       {/* Editor Top Bar (LeetCode Style) */}
-      <div className="flex items-center justify-between bg-[#262626] border-b border-[#383838] px-3 py-1.5 text-xs">
+      <div className="flex items-center justify-between bg-[#262626] border-b border-[#383838] px-3 py-1.5 text-xs select-none">
         {/* Left: Language & File Selector */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#333333] text-[#eff1f6] font-medium text-[11px] border border-[#444]">
@@ -80,8 +82,15 @@ export const OpsEditor: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Actions (Copy, Reset) */}
+        {/* Right: Actions (Settings, Reset, Copy) */}
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setShowSettingsModal(true)}
+            className="p-1 rounded text-zinc-400 hover:text-white hover:bg-[#333333] transition"
+            title="Editor Settings"
+          >
+            <Settings className="w-3.5 h-3.5" />
+          </button>
           <button
             onClick={resetFiles}
             className="p-1 rounded text-zinc-400 hover:text-white hover:bg-[#333333] transition"
@@ -101,15 +110,24 @@ export const OpsEditor: React.FC = () => {
       </div>
 
       {/* Editor Body */}
-      <div className="relative flex-1 min-h-0 flex overflow-hidden bg-[#1e1e1e] font-mono text-[13px]">
+      <div 
+        className="relative flex-1 min-h-0 flex overflow-hidden bg-[#1e1e1e]"
+        style={{ fontFamily: editorSettings.fontFamily || "'Fira Code', monospace" }}
+      >
         {/* Line Numbers Gutter */}
-        <div className="select-none py-3 px-3 bg-[#1e1e1e] text-zinc-600 text-right border-r border-[#2e2e2e] w-12 shrink-0 overflow-hidden">
-          {lines.map((_, idx) => (
-            <div key={idx} className="leading-6 text-xs">
-              {idx + 1}
-            </div>
-          ))}
-        </div>
+        {editorSettings.showLineNumbers && (
+          <div className="select-none py-3 px-3 bg-[#1e1e1e] text-zinc-600 text-right border-r border-[#2e2e2e] w-12 shrink-0 overflow-hidden">
+            {lines.map((_, idx) => (
+              <div 
+                key={idx} 
+                className="leading-6"
+                style={{ fontSize: `${editorSettings.fontSize - 1}px` }}
+              >
+                {idx + 1}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Textarea Code Input */}
         <textarea
@@ -119,13 +137,17 @@ export const OpsEditor: React.FC = () => {
           spellCheck={false}
           autoCapitalize="off"
           autoComplete="off"
+          style={{ 
+            fontSize: `${editorSettings.fontSize}px`,
+            whiteSpace: editorSettings.wordWrap ? 'pre-wrap' : 'pre'
+          }}
           className="flex-1 w-full h-full p-3 bg-transparent text-[#eff1f6] leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-zinc-700 selection:text-white overflow-y-auto"
           placeholder="Write or remediate configuration here..."
         />
       </div>
 
       {/* Editor Footer Status Bar */}
-      <div className="px-3 py-1 bg-[#262626] border-t border-[#333333] text-[11px] font-mono text-zinc-400 flex items-center justify-between">
+      <div className="px-3 py-1 bg-[#262626] border-t border-[#383838] text-[11px] font-mono text-zinc-400 flex items-center justify-between select-none">
         <div className="flex items-center gap-3">
           <span>{selectedFileName}</span>
           <span>{lines.length} lines</span>
@@ -133,7 +155,7 @@ export const OpsEditor: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#00b8a3] inline-block"></span>
-          <span>Spaces: 2</span>
+          <span>Spaces: {editorSettings.tabSize || 2}</span>
         </div>
       </div>
     </div>

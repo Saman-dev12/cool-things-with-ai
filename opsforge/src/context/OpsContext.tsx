@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { OpsChallenge, OpsTrack, ClusterTopology, GradeSummary, ViewMode, Difficulty } from '../types/ops';
+import { OpsChallenge, OpsTrack, ClusterTopology, GradeSummary, ViewMode, Difficulty, EditorSettings } from '../types/ops';
 import { OPS_CHALLENGES } from '../data/catalog';
 import { ALL_105_PROBLEMS, ProblemListItem, INTERACTIVE_CHALLENGES } from '../data/problemsData';
 import { executeCommand } from '../runner/terminalSimulator';
@@ -51,6 +51,10 @@ interface OpsContextType {
     hardSolved: number;
     hardTotal: number;
   };
+  showSettingsModal: boolean;
+  setShowSettingsModal: (v: boolean) => void;
+  editorSettings: EditorSettings;
+  updateEditorSettings: (settings: Partial<EditorSettings>) => void;
 }
 
 const OpsContext = createContext<OpsContextType | undefined>(undefined);
@@ -87,6 +91,30 @@ export const OpsProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [theme]);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [editorSettings, setEditorSettings] = useState<EditorSettings>(() => {
+    try {
+      const saved = localStorage.getItem('opsforge_editor_settings');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      fontSize: 13,
+      tabSize: 2,
+      fontFamily: "'Fira Code', monospace",
+      wordWrap: true,
+      showLineNumbers: true
+    };
+  });
+
+  const updateEditorSettings = (newSettings: Partial<EditorSettings>) => {
+    setEditorSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      try {
+        localStorage.setItem('opsforge_editor_settings', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
 
   // Files for active challenge
   const [files, setFiles] = useState<Record<string, string>>(() => {
@@ -522,7 +550,11 @@ spec:
           medTotal,
           hardSolved,
           hardTotal
-        }
+        },
+        showSettingsModal,
+        setShowSettingsModal,
+        editorSettings,
+        updateEditorSettings
       }}
     >
       {children}

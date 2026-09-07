@@ -3,6 +3,7 @@ import { OpsProvider, useOps } from './context/OpsContext';
 import { OpsNavbar } from './components/layout/OpsNavbar';
 import { ProblemSetView } from './components/problemset/ProblemSetView';
 import { OpsWorkspace } from './components/layout/OpsWorkspace';
+import { SettingsModal } from './components/settings/SettingsModal';
 
 function MainContent() {
   const { viewMode } = useOps();
@@ -12,6 +13,7 @@ function MainContent() {
       <div className="flex-1 min-h-0 w-full overflow-hidden flex flex-col">
         {viewMode === 'problemset' ? <ProblemSetView /> : <OpsWorkspace />}
       </div>
+      <SettingsModal />
     </div>
   );
 }
