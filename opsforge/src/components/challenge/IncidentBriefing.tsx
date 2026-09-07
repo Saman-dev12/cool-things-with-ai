@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useOps } from '../../context/OpsContext';
 import { TRACK_INFO } from '../../data/catalog';
+import { highlightCode } from '../../utils/highlighter';
 import { 
   CheckCircle2, 
   HelpCircle, 
@@ -51,6 +52,12 @@ export const IncidentBriefing: React.FC = () => {
         return <span className="bg-[#ff375f]/15 text-[#ff375f] px-2.5 py-0.5 rounded-full text-xs font-medium">Hard</span>;
     }
   };
+
+  const refFile = currentChallenge.postMortem.referenceFiles[0];
+  const highlightedRefCode = useMemo(() => {
+    if (!refFile?.content) return '';
+    return highlightCode(refFile.content, refFile.name || 'solution.yaml');
+  }, [refFile]);
 
   return (
     <div className="flex flex-col h-full bg-[#262626] border border-[#383838] rounded-lg overflow-hidden shadow-sm">
@@ -284,8 +291,8 @@ export const IncidentBriefing: React.FC = () => {
                 </div>
 
                 <div className="rounded-md border border-[#383838] bg-[#181818] overflow-hidden">
-                  <pre className="p-3.5 text-xs font-mono text-zinc-300 overflow-x-auto max-h-72 leading-relaxed">
-                    {currentChallenge.postMortem.referenceFiles[0].content}
+                  <pre className="p-3.5 text-xs font-mono overflow-x-auto max-h-72 leading-relaxed">
+                    <code dangerouslySetInnerHTML={{ __html: highlightedRefCode }} />
                   </pre>
                 </div>
               </div>

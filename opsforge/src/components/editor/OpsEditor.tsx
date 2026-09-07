@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { useOps } from '../../context/OpsContext';
 import { Copy, Check, FileCode, RotateCcw, ChevronDown, Settings } from 'lucide-react';
+import { getLanguageForFile, highlightCode } from '../../utils/highlighter';
 
 export const OpsEditor: React.FC = () => {
   const {
@@ -14,9 +15,17 @@ export const OpsEditor: React.FC = () => {
   } = useOps();
 
   const [copied, setCopied] = useState(false);
+  const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
 
   const activeContent = files[selectedFileName] || '';
   const lines = activeContent.split('\n');
+
+  const langInfo = useMemo(() => getLanguageForFile(selectedFileName), [selectedFileName]);
+  const highlightedCode = useMemo(() => highlightCode(activeContent, selectedFileName), [activeContent, selectedFileName]);
 
   const handleCopy = async () => {
     try {
@@ -24,6 +33,26 @@ export const OpsEditor: React.FC = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {}
+  };
+
+  const updateCursorPos = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget;
+    const pos = target.selectionStart || 0;
+    const linesBefore = activeContent.substring(0, pos).split('\n');
+    const line = linesBefore.length;
+    const col = (linesBefore[linesBefore.length - 1] || '').length + 1;
+    setCursorPos({ line, col });
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const { scrollTop, scrollLeft } = e.currentTarget;
+    if (preRef.current) {
+      preRef.current.scrollTop = scrollTop;
+      preRef.current.scrollLeft = scrollLeft;
+    }
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = scrollTop;
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -38,16 +67,20 @@ export const OpsEditor: React.FC = () => {
 
       setTimeout(() => {
         target.selectionStart = target.selectionEnd = start + (editorSettings.tabSize || 2);
+        updateCursorPos(e);
       }, 0);
     }
   };
 
-  const getLanguageName = () => {
-    if (selectedFileName.endsWith('.yaml') || selectedFileName.endsWith('.yml')) return 'YAML';
-    if (selectedFileName.endsWith('.tf')) return 'HCL / Terraform';
-    if (selectedFileName.endsWith('.sh') || selectedFileName === 'entrypoint.sh') return 'Bash Shell';
-    if (selectedFileName === 'Dockerfile') return 'Dockerfile';
-    return 'Configuration';
+  const lineHeightPx = 22;
+  const editorFontStyle: React.CSSProperties = {
+    fontFamily: editorSettings.fontFamily || "'Fira Code', monospace",
+    fontSize: `${editorSettings.fontSize}px`,
+    lineHeight: `${lineHeightPx}px`,
+    tabSize: editorSettings.tabSize || 2,
+    whiteSpace: editorSettings.wordWrap ? 'pre-wrap' : 'pre',
+    wordBreak: editorSettings.wordWrap ? 'break-word' : 'normal',
+    letterSpacing: '0px',
   };
 
   return (
@@ -56,8 +89,8 @@ export const OpsEditor: React.FC = () => {
       <div className="flex items-center justify-between bg-[#262626] border-b border-[#383838] px-3 py-1.5 text-xs select-none">
         {/* Left: Language & File Selector */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#333333] text-[#eff1f6] font-medium text-[11px] border border-[#444]">
-            <span>{getLanguageName()}</span>
+          <div className="flex items-center gap-1 px-2.5 py-0.5 rounded bg-[#333333] text-[#eff1f6] font-medium text-[11px] border border-[#444]">
+            <span>{langInfo.displayName}</span>
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           </div>
 
@@ -67,7 +100,10 @@ export const OpsEditor: React.FC = () => {
               return (
                 <button
                   key={fileName}
-                  onClick={() => setSelectedFileName(fileName)}
+                  onClick={() => {
+                    setSelectedFileName(fileName);
+                    setCursorPos({ line: 1, col: 1 });
+                  }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono transition ${
                     isSelected
                       ? 'bg-[#1e1e1e] text-white font-medium border border-[#383838]'
@@ -110,46 +146,85 @@ export const OpsEditor: React.FC = () => {
       </div>
 
       {/* Editor Body */}
-      <div 
-        className="relative flex-1 min-h-0 flex overflow-hidden bg-[#1e1e1e]"
-        style={{ fontFamily: editorSettings.fontFamily || "'Fira Code', monospace" }}
-      >
+      <div className="relative flex-1 min-h-0 flex overflow-hidden bg-[#1e1e1e]">
         {/* Line Numbers Gutter */}
         {editorSettings.showLineNumbers && (
-          <div className="select-none py-3 px-3 bg-[#1e1e1e] text-zinc-600 text-right border-r border-[#2e2e2e] w-12 shrink-0 overflow-hidden">
-            {lines.map((_, idx) => (
-              <div 
-                key={idx} 
-                className="leading-6"
-                style={{ fontSize: `${editorSettings.fontSize - 1}px` }}
-              >
-                {idx + 1}
-              </div>
-            ))}
+          <div 
+            ref={gutterRef}
+            onWheel={(e) => {
+              if (textareaRef.current) {
+                textareaRef.current.scrollTop += e.deltaY;
+              }
+            }}
+            className="select-none py-3 px-2 bg-[#1e1e1e] text-zinc-600 text-right border-r border-[#2e2e2e] w-12 shrink-0 overflow-hidden"
+            style={{ fontFamily: editorSettings.fontFamily || "'Fira Code', monospace" }}
+          >
+            {lines.map((_, idx) => {
+              const isCurrent = idx + 1 === cursorPos.line;
+              return (
+                <div 
+                  key={idx} 
+                  style={{ 
+                    height: `${lineHeightPx}px`, 
+                    lineHeight: `${lineHeightPx}px`,
+                    fontSize: `${editorSettings.fontSize - 1}px` 
+                  }}
+                  className={`transition-colors font-mono ${isCurrent ? 'text-[#eff1f6] font-semibold' : 'text-zinc-600'}`}
+                >
+                  {idx + 1}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Textarea Code Input */}
-        <textarea
-          value={activeContent}
-          onChange={e => updateFileContent(selectedFileName, e.target.value)}
-          onKeyDown={handleKeyDown}
-          spellCheck={false}
-          autoCapitalize="off"
-          autoComplete="off"
-          style={{ 
-            fontSize: `${editorSettings.fontSize}px`,
-            whiteSpace: editorSettings.wordWrap ? 'pre-wrap' : 'pre'
-          }}
-          className="flex-1 w-full h-full p-3 bg-transparent text-[#eff1f6] leading-6 resize-none focus:outline-none focus:ring-0 selection:bg-zinc-700 selection:text-white overflow-y-auto"
-          placeholder="Write or remediate configuration here..."
-        />
+        {/* Code Content Container */}
+        <div className="ops-editor-container">
+          {/* Syntax Highlighted Layer (Rendered underneath) */}
+          <pre
+            ref={preRef}
+            className="ops-editor-pre"
+            style={editorFontStyle}
+            aria-hidden="true"
+          >
+            <code
+              dangerouslySetInnerHTML={{
+                __html: highlightedCode + (activeContent.endsWith('\n') ? ' ' : '')
+              }}
+            />
+          </pre>
+
+          {/* Interactive Input Layer (Transparent text, amber cursor) */}
+          <textarea
+            ref={textareaRef}
+            value={activeContent}
+            onChange={e => {
+              updateFileContent(selectedFileName, e.target.value);
+              updateCursorPos(e);
+            }}
+            onKeyDown={e => {
+              handleKeyDown(e);
+              setTimeout(() => updateCursorPos(e), 0);
+            }}
+            onKeyUp={updateCursorPos}
+            onClick={updateCursorPos}
+            onSelect={updateCursorPos}
+            onScroll={handleScroll}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            style={editorFontStyle}
+            className="ops-editor-textarea"
+            placeholder="Write or remediate configuration here..."
+          />
+        </div>
       </div>
 
       {/* Editor Footer Status Bar */}
       <div className="px-3 py-1 bg-[#262626] border-t border-[#383838] text-[11px] font-mono text-zinc-400 flex items-center justify-between select-none">
         <div className="flex items-center gap-3">
           <span>{selectedFileName}</span>
+          <span className="text-zinc-300">Ln {cursorPos.line}, Col {cursorPos.col}</span>
           <span>{lines.length} lines</span>
           <span>UTF-8</span>
         </div>
@@ -161,3 +236,4 @@ export const OpsEditor: React.FC = () => {
     </div>
   );
 };
+

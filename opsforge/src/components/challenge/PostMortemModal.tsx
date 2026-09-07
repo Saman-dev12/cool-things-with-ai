@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useOps } from '../../context/OpsContext';
 import { X, BookOpen, AlertOctagon, CheckCircle2, Shield, Copy, Check } from 'lucide-react';
+import { highlightCode } from '../../utils/highlighter';
 
 export const PostMortemModal: React.FC = () => {
   const { currentChallenge, showPostMortem, setShowPostMortem } = useOps();
@@ -11,6 +12,11 @@ export const PostMortemModal: React.FC = () => {
 
   const { postMortem } = currentChallenge;
   const activeRefFile = postMortem.referenceFiles[selectedRefTab] || postMortem.referenceFiles[0];
+
+  const highlightedRefContent = useMemo(() => {
+    if (!activeRefFile?.content) return '';
+    return highlightCode(activeRefFile.content, activeRefFile.name || 'config.yaml');
+  }, [activeRefFile]);
 
   const handleCopy = async () => {
     if (!activeRefFile) return;
@@ -126,8 +132,8 @@ export const PostMortemModal: React.FC = () => {
                   ))}
                 </div>
 
-                <pre className="p-4 text-[11px] font-mono leading-5 text-slate-200 overflow-x-auto max-h-72">
-                  {activeRefFile?.content}
+                <pre className="p-4 text-[11px] font-mono leading-5 overflow-x-auto max-h-72">
+                  <code dangerouslySetInnerHTML={{ __html: highlightedRefContent }} />
                 </pre>
               </div>
             </div>
