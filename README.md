@@ -11,7 +11,6 @@ This repository serves as a **modular monorepo** hosting multiple independent, s
 | Project | Category | Description | Tech Stack | Quick Links |
 | :--- | :--- | :--- | :--- | :--- |
 | [**OpsForge**](./opsforge) | **DevOps & Cloud SRE** | Interactive incident response arena ("LeetCode for DevOps"). Diagnose CrashLoopBackOffs, disk exhaustion, and IaC drift with a live Kubernetes cluster visualizer, in-browser POSIX terminal, syntax-highlighted editor, and automated grading. | React 19, TypeScript, Tailwind CSS v4, Prism.js, Vite | [Folder](./opsforge) • [README](./opsforge/README.md) |
-| [**Minecraft Web**](./minecraft-web) | **3D Voxel Engine & Gaming** | Authentic, playable 3D Voxel Minecraft sandbox running in the browser at 60 FPS. Features chunk-based culled face meshing, procedural fractal terrain (plains, forests, deserts, snowy mountains), first-person AABB physics, mining/building, TNT explosions, synthesized Web Audio sound effects, and full Minecraft HUD/UI (Hotbar, 2x2 Crafting, F3 Debug). | React 19, Three.js, TypeScript, Tailwind CSS v4, Web Audio API, Vite | [Folder](./minecraft-web) • [README](./minecraft-web/README.md) |
 | [**3D AI BattleStation**](./3d-ai-battlestation) | **3D Graphics & Simulation** | Photorealistic architectural loft with First-Person navigation (WASD + mouse look). Features a custom liquid-cooled Lian Li PC rig with an RTX 5090 and a 34" ultrawide curved monitor running an interactive in-world virtual OS (AetherOS). | React 19, Three.js, React Three Fiber, Web Audio API, Vite | [Folder](./3d-ai-battlestation) • [README](./3d-ai-battlestation/README.md) |
 
 *(More experimental projects and interactive tools will be added here!)*
@@ -25,7 +24,6 @@ This repository is organized as a lightweight, independent multi-project workspa
 ```
 cool-things-with-ai/
 ├── opsforge/               # Interactive DevOps & SRE scenario challenge platform
-├── minecraft-web/          # 3D Voxel Minecraft engine & playable sandbox
 ├── 3d-ai-battlestation/    # 3D architectural loft & in-world virtual desktop OS
 ├── <future-project>/       # New independent projects slot in here
 └── README.md               # Monorepo portal & project directory
