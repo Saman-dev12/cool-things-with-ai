@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { World } from '../../voxel/World';
 import { PlayerController } from '../../physics/PlayerController';
@@ -45,6 +45,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   isPaused
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [isLocked, setIsLocked] = useState(false);
 
   // References to core systems
   const worldRef = useRef<World | null>(null);
@@ -71,9 +72,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const height = window.innerHeight;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xa5c4ff, 25, 75);
+    scene.fog = new THREE.Fog(0xa5c4ff, 50, 160);
 
     const camera = new THREE.PerspectiveCamera(settings.fov || 75, width / height, 0.1, 300);
+    scene.add(camera); // Required for HandViewModel rendering!
+
     const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -88,9 +91,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     scene.add(world.group);
     worldRef.current = world;
 
-    // 3. Player Controller
+    // 3. Player Controller with safe ground spawn
     const controller = new PlayerController(camera, world);
-    controller.position.set(8, 38, 8); // Spawn above ground
+    controller.position.copy(world.getSpawnPoint());
     controllerRef.current = controller;
 
     // 4. Skybox & Celestial Cycle
@@ -182,13 +185,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const handleClickCanvas = () => {
-      if (!controller.isLocked && !isPaused) {
-        controller.requestPointerLock(renderer.domElement);
+      if (!isPaused) {
+        try {
+          renderer.domElement.requestPointerLock();
+        } catch {}
       }
     };
 
     const handlePointerLockChange = () => {
-      controller.isLocked = document.pointerLockElement === renderer.domElement;
+      const locked = document.pointerLockElement === renderer.domElement || !!document.pointerLockElement;
+      controller.isLocked = locked;
+      setIsLocked(locked);
     };
 
     const handleContextMenu = (e: MouseEvent) => {
@@ -298,6 +305,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         hand.update(dt, isMoving);
 
         // Voxel Raycast from Camera Center
+        camera.updateMatrixWorld();
         const ray = new THREE.Ray(camera.position, camera.getWorldDirection(new THREE.Vector3()));
         const target = world.raycast(ray, 5.5);
         currentTargetRef.current = target;
@@ -428,5 +436,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   }, [settings.fov]);
 
-  return <div ref={mountRef} className="w-full h-full absolute inset-0 cursor-crosshair overflow-hidden" />;
+  return (
+    <div className="w-full h-full absolute inset-0 overflow-hidden">
+      <div ref={mountRef} className="w-full h-full cursor-crosshair" />
+
+      {/* Click Anywhere to Play Overlay when cursor is unlocked */}
+      {!isLocked && !isPaused && (
+        <div
+          onClick={() => {
+            if (mountRef.current) {
+              const canvas = mountRef.current.querySelector('canvas');
+              canvas?.requestPointerLock?.();
+            }
+          }}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/50 backdrop-blur-xs cursor-pointer text-white font-mono select-none animate-fadeIn"
+        >
+          <div className="bg-[#2a2a2a]/95 border-4 border-[#181818] rounded-lg p-6 flex flex-col items-center gap-3 shadow-2xl max-w-sm text-center">
+            <h2 className="text-2xl font-bold text-amber-300 drop-shadow">
+              Click Anywhere to Play
+            </h2>
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Locks mouse cursor for authentic 360° Minecraft camera movement.
+            </p>
+            <div className="text-[11px] text-zinc-400 border-t border-zinc-700 pt-2.5 w-full flex justify-between">
+              <span>WASD to Move</span>
+              <span>ESC to Pause</span>
+              <span>E for Inventory</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };

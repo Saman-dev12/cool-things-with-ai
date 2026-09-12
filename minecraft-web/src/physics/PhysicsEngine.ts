@@ -8,10 +8,10 @@ export class PhysicsEngine {
   public playerHeight = 1.8;
   public eyeHeight = 1.62;
 
-  public gravity = -28.0;
+  public gravity = -26.0;
   public terminalVelocity = -50.0;
-  public waterGravity = -4.0;
-  public waterDrag = 0.75;
+  public waterGravity = -3.5;
+  public waterDrag = 0.8;
 
   constructor() {}
 
@@ -21,13 +21,15 @@ export class PhysicsEngine {
     return !!def;
   }
 
+  // Tests if bounding box intersects solid blocks, with boundary epsilon
   public checkCollision(world: World, box: THREE.Box3): boolean {
-    const minX = Math.floor(box.min.x);
-    const maxX = Math.floor(box.max.x);
-    const minY = Math.floor(box.min.y);
-    const maxY = Math.floor(box.max.y);
-    const minZ = Math.floor(box.min.z);
-    const maxZ = Math.floor(box.max.z);
+    const eps = 0.005;
+    const minX = Math.floor(box.min.x + eps);
+    const maxX = Math.floor(box.max.x - eps);
+    const minY = Math.floor(box.min.y + eps);
+    const maxY = Math.floor(box.max.y - eps);
+    const minZ = Math.floor(box.min.z + eps);
+    const maxZ = Math.floor(box.max.z - eps);
 
     for (let x = minX; x <= maxX; x++) {
       for (let y = minY; y <= maxY; y++) {
@@ -58,94 +60,125 @@ export class PhysicsEngine {
     isSneaking: boolean,
     isFlying: boolean
   ): { isGrounded: boolean; inWater: boolean } {
-    // Check if player is currently in water
+    // Water check
     const blockAtFeet = world.getBlock(Math.floor(pos.x), Math.floor(pos.y + 0.2), Math.floor(pos.z));
     const blockAtWaist = world.getBlock(Math.floor(pos.x), Math.floor(pos.y + 0.9), Math.floor(pos.z));
     const inWater = blockAtFeet === BlockType.WATER || blockAtWaist === BlockType.WATER;
 
-    // Apply gravity
+    // Check if player has solid ground directly below
+    const groundProbeBox = this.getPlayerBox(pos);
+    groundProbeBox.min.y -= 0.08;
+    groundProbeBox.max.y = pos.y + 0.01;
+    const hasGroundBelow = this.checkCollision(world, groundProbeBox);
+
+    let isGrounded = hasGroundBelow && vel.y <= 0.001;
+
+    // Apply vertical forces
     if (!isFlying) {
       if (inWater) {
         vel.y += this.waterGravity * dt;
-        vel.y = Math.max(vel.y, -8.0);
+        vel.y = Math.max(vel.y, -6.0);
         vel.x *= Math.pow(this.waterDrag, dt * 60);
         vel.z *= Math.pow(this.waterDrag, dt * 60);
-      } else {
+      } else if (!isGrounded) {
         vel.y += this.gravity * dt;
         vel.y = Math.max(vel.y, this.terminalVelocity);
+      } else {
+        // Grounded: zero out negative vertical velocity
+        if (vel.y < 0) vel.y = 0;
       }
     } else {
       vel.y *= Math.pow(0.8, dt * 60);
     }
 
-    let isGrounded = false;
-    const halfW = this.playerWidth / 2;
-
     // 1. Move along Y
-    const dy = vel.y * dt;
-    pos.y += dy;
-    let box = this.getPlayerBox(pos);
+    if (vel.y !== 0) {
+      const prevY = pos.y;
+      pos.y += vel.y * dt;
+      const boxY = this.getPlayerBox(pos);
 
-    if (this.checkCollision(world, box)) {
-      if (dy < 0) {
-        // Falling down - hit floor
-        isGrounded = true;
-        pos.y = Math.floor(pos.y) + 1; // Snap on top of block
-      } else if (dy > 0) {
-        // Jumping up - hit ceiling
-        pos.y = Math.floor(pos.y + this.playerHeight) - this.playerHeight - 0.001;
+      if (this.checkCollision(world, boxY)) {
+        if (vel.y < 0) {
+          isGrounded = true;
+          pos.y = Math.round(prevY);
+          // Ensure clear
+          while (this.checkCollision(world, this.getPlayerBox(pos)) && pos.y < prevY + 1.2) {
+            pos.y += 0.05;
+          }
+        } else {
+          pos.y = prevY;
+        }
+        vel.y = 0;
       }
-      vel.y = 0;
     }
 
-    // Sneaking ledge check: prevent walking off block if sneaking and grounded
+    // Sneaking ledge protection: stop from walking off cliff
     if (isSneaking && isGrounded) {
-      const stepX = vel.x * dt;
-      const stepZ = vel.z * dt;
-
-      // Test if moving forward on X leaves no ground beneath
-      const testPosX = pos.clone();
-      testPosX.x += stepX;
-      testPosX.y -= 0.1;
-      const boxBelowX = this.getPlayerBox(testPosX);
+      const testX = pos.clone();
+      testX.x += vel.x * dt;
+      const boxBelowX = this.getPlayerBox(testX);
+      boxBelowX.min.y -= 0.6;
+      boxBelowX.max.y = testX.y + 0.01;
       if (!this.checkCollision(world, boxBelowX)) {
         vel.x = 0;
       }
 
-      // Test if moving forward on Z leaves no ground beneath
-      const testPosZ = pos.clone();
-      testPosZ.z += stepZ;
-      testPosZ.y -= 0.1;
-      const boxBelowZ = this.getPlayerBox(testPosZ);
+      const testZ = pos.clone();
+      testZ.z += vel.z * dt;
+      const boxBelowZ = this.getPlayerBox(testZ);
+      boxBelowZ.min.y -= 0.6;
+      boxBelowZ.max.y = testZ.y + 0.01;
       if (!this.checkCollision(world, boxBelowZ)) {
         vel.z = 0;
       }
     }
 
-    // 2. Move along X
-    const dx = vel.x * dt;
-    pos.x += dx;
-    box = this.getPlayerBox(pos);
-    if (this.checkCollision(world, box)) {
-      if (dx > 0) {
-        pos.x = Math.floor(pos.x + halfW) - halfW - 0.001;
-      } else if (dx < 0) {
-        pos.x = Math.floor(pos.x - halfW) + 1 + halfW + 0.001;
+    // 2. Move along X with auto step-up for 1-block terrain
+    if (vel.x !== 0) {
+      const prevX = pos.x;
+      pos.x += vel.x * dt;
+      const boxX = this.getPlayerBox(pos);
+
+      if (this.checkCollision(world, boxX)) {
+        let stepped = false;
+        if (isGrounded) {
+          const stepPos = pos.clone();
+          stepPos.y += 1.05;
+          if (!this.checkCollision(world, this.getPlayerBox(stepPos))) {
+            pos.y += 1.0;
+            stepped = true;
+          }
+        }
+
+        if (!stepped) {
+          pos.x = prevX;
+          vel.x = 0;
+        }
       }
-      vel.x = 0;
     }
 
-    // 3. Move along Z
-    const dz = vel.z * dt;
-    pos.z += dz;
-    box = this.getPlayerBox(pos);
-    if (this.checkCollision(world, box)) {
-      if (dz > 0) {
-        pos.z = Math.floor(pos.z + halfW) - halfW - 0.001;
-      } else if (dz < 0) {
-        pos.z = Math.floor(pos.z - halfW) + 1 + halfW + 0.001;
+    // 3. Move along Z with auto step-up
+    if (vel.z !== 0) {
+      const prevZ = pos.z;
+      pos.z += vel.z * dt;
+      const boxZ = this.getPlayerBox(pos);
+
+      if (this.checkCollision(world, boxZ)) {
+        let stepped = false;
+        if (isGrounded) {
+          const stepPos = pos.clone();
+          stepPos.y += 1.05;
+          if (!this.checkCollision(world, this.getPlayerBox(stepPos))) {
+            pos.y += 1.0;
+            stepped = true;
+          }
+        }
+
+        if (!stepped) {
+          pos.z = prevZ;
+          vel.z = 0;
+        }
       }
-      vel.z = 0;
     }
 
     return { isGrounded, inWater };

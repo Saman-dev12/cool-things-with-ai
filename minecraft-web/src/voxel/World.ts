@@ -75,6 +75,19 @@ export class World {
     }
   }
 
+  public getSpawnPoint(): THREE.Vector3 {
+    const spawnX = 8;
+    const spawnZ = 8;
+    // Scan down from top of world to find highest solid ground
+    for (let y = CHUNK_SIZE_Y - 2; y >= 2; y--) {
+      const b = this.getBlock(spawnX, y, spawnZ);
+      if (b !== BlockType.AIR && b !== BlockType.WATER) {
+        return new THREE.Vector3(spawnX + 0.5, y + 1.0, spawnZ + 0.5);
+      }
+    }
+    return new THREE.Vector3(spawnX + 0.5, 36, spawnZ + 0.5);
+  }
+
   // Generate a rectangular area of chunks around center (e.g. 5x5 chunks = 80x80 blocks)
   public generateArea(centerChunkX = 0, centerChunkZ = 0, radius = 2) {
     // 1. First pass: generate terrain voxels for all chunks in area

@@ -232,8 +232,9 @@ export class Chunk {
       const material = new THREE.MeshLambertMaterial({
         map: atlas.texture,
         vertexColors: true,
-        alphaTest: 0.1,
-        transparent: true
+        alphaTest: 0.5,
+        transparent: false,
+        side: THREE.FrontSide
       });
 
       this.mesh = new THREE.Mesh(geometry, material);
@@ -256,6 +257,7 @@ export class Chunk {
         vertexColors: true,
         transparent: true,
         opacity: 0.65,
+        depthWrite: false,
         side: THREE.DoubleSide
       });
 
